@@ -1,3 +1,4 @@
+![Logo](Examples/WeeksatNo1Hist.png)
 # ATP-Singles-Rankings-Data-Analysis
 Python/SQLITE3 based project which scrapes data from the atptour.com and uses Matplotlib and database parsing for data analysis. 
 ## How to Use
