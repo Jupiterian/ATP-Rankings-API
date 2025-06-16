@@ -14,7 +14,7 @@ The repository comes with two files: ```generate.py``` and ```filler.py```. ```G
 ### 3. Debugging
 The database might generate some blank/1 row tables while updating the datbase. To locate these tables, you can simply run debug.py. After this, manually delete an tables that only have 1 row. This will help to prevent errors while generating a list of number 1's or player factiles. 
 ### 4. Data Analysis
-As the name suggests, ```analyze.py``` is used to perform data analysis. The file requires command arguments (much like linux). More detail on how to use these commands is in the Examples folder, but attached is the analyze.py help menu, which can also be attained by running ```python3 analyze.py -h```
+As the name suggests, ```analyze.py``` is used to perform data analysis. The file requires command arguments (much like linux). More detail on how to use these commands is [here](Examples/Examples.md), but attached is the analyze.py help menu, which can also be attained by running ```python3 analyze.py -h```
 ```
 Usage: analyze.py [OPTION] <first_last> <first2_last2>
 
