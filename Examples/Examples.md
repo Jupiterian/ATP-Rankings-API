@@ -4,7 +4,7 @@ This document provides practical examples of how to use the analysis scripts in 
 
 ---
 
-## 1. Plot a Player's Ranking History
+## 1. Plot a Multiple Players' Ranking History
 
 **Command Example:**
 ```bash
@@ -12,7 +12,7 @@ python3 analyze.py -r Roger_Federer Rafael_Nadal Novak_Djokovic
 ```
 
 **Description:**  
-Generates a plot showing the Big 3 ATP singles ranking over time.
+Generates a plot showing the provided players ATP singles ranking over time.
 
 **Expected Output:**  
 A matplotlib line graph with the y-axis as ATP ranking (lower is better), x-axis as date.
@@ -27,7 +27,7 @@ python3 analyze.py -p Rafael_Nadal Novak_Djokovic Roger_Federer
 ```
 
 **Description:**  
-Plots the ATP points history for Big 3 on the same graph for comparison.
+Plots the ATP points history for provided players on the same graph for comparison.
 
 **Expected Output:**  
 A matplotlib line graph with separate lines for each player, showing their point totals over time.
@@ -42,7 +42,7 @@ python3 analyze.py -f Novak_Djokovic
 ```
 
 **Description:**  
-Outputs a factile (summary statistics) for Novak Djokovic, including career high rank, most points, weeks in top 100/10/1, etc.
+Outputs a factile (summary statistics) for the provided player, including career high rank, most points, weeks in top 100/10/1, etc.
 
 **Expected Output:**
 ```
