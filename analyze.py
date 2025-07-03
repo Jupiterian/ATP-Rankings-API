@@ -132,7 +132,6 @@ if sys.argv[1] == "-n":
         rank1.append(cur.fetchall())
     data = []
     for b in rank1:
-        print(f"Row: {b}, Length: {len(b)}")
         row = b[0]
         data.append(row[1])
     
@@ -147,7 +146,7 @@ if sys.argv[1] == "-n":
     plt.bar(names, weeks, color='skyblue', edgecolor='black')
     plt.xlabel('Player', fontsize=12)
     plt.ylabel('Weeks at Number 1', fontsize=12)
-    plt.title('Total Weeks at Number 1 by Player', fontsize=15)
+    plt.title('Total Weeks at Number 1', fontsize=15)
     plt.xticks(rotation=45, ha='right', fontsize=10)
     plt.grid(axis='y', linestyle='--', alpha=0.7)
     plt.tight_layout()
