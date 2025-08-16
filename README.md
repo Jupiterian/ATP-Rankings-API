@@ -11,7 +11,12 @@ pip install -r requirements.txt
 Additionally, update the database to get the latest rankings. The database file in this github only has the data up until 6/16/2025.
 ### 2. Database Maintenance
 The repository comes with two files: ```generate.py``` and ```filler.py```. ```Generate.py``` is only meant to serve as a completely clean regeneration of the database. Should you need to regenerate the entire database, in case of an accidental deletion, you can simply run the file. ```Generate.py``` also comes with a start date variable, so if the script stops in between, you can restart the generation where it left off.
+<br>
+<br>
 ```Filler.py``` is the second, and more used of the two database files. As the name suggests, ```filler.py``` simply serves as an updater. **In order to get the latest data, run filler.py and do not generate.py.** ```Filler.py``` is dependent on ```generate.py``` for functions to add to the database. 
+<br>
+<br>
+If you would like to preivew the database in GUI, my recommended tool is [here](https://sqlitebrowser.org/).
 ### 3. Debugging
 The database might generate some blank/1 row tables while updating the datbase. To locate these tables, you can simply run debug.py. After this, manually delete an tables that only have 1 row. This will help to prevent errors while generating a list of number 1's or player factiles. 
 ### 4. Data Analysis
