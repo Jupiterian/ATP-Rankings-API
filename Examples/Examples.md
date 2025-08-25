@@ -96,7 +96,7 @@ Completely rebuilds the SQLite database from historical ATP data.
 
 ---
 
-##7. Debug the Database for Anomalies
+## 7. Debug the Database for Anomalies
 
 **Command:**
 ```bash
