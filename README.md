@@ -1,6 +1,26 @@
 ![Logo](Examples/WeeksatNo1Hist.png)
 # ATP-Rankings-Data-Visualization
-Python/SQLITE3 based project which scrapes data from the atptour.com and uses Matplotlib and database parsing for data visualization. 
+Python/SQLITE3 based project which scrapes data from the atptour.com and uses Matplotlib and database parsing for data visualization. Now includes a FastAPI web application to browse rankings data!
+
+## Features
+- 🎾 **Data Scraping**: Automated collection of ATP rankings from atptour.com
+- 📊 **Data Visualization**: matplotlib-based charts and graphs
+- 🗄️ **Database Management**: SQLite3 for efficient data storage
+- 🌐 **Web Interface**: FastAPI application to browse rankings by week
+- 📈 **Analysis Tools**: Command-line tools for player statistics
+
+## Quick Start
+
+### Web Application
+Run the FastAPI web server to browse rankings:
+```bash
+python main.py
+```
+Then open your browser to `http://localhost:8000`
+
+### Data Analysis
+Use the command-line tools for specific analyses (see section 4 below)
+
 ## How to Use
 The following is directions on how to setup, maintain, and analyze the data.
 ### 1. Setup
@@ -37,4 +57,51 @@ Usage: analyze.py [OPTION] <first_last> <first2_last2>
         python analyze.py -p first_last first2_last2
             Generates and displays a plot of the selected player's point history. Supports multiple names.
         python analyze.py -f first_last
-            Generates and outputs a player statistics factile of the selected player.```
+            Generates and outputs a player statistics factile of the selected player.
+```
+
+## 5. Web Application
+The project includes a FastAPI web application for browsing rankings data through a modern web interface.
+
+### Running the Web App
+```bash
+python main.py
+```
+
+The application will be available at `http://localhost:8000`
+
+### Features
+- **Home Page**: Browse all available weeks organized by year
+- **Week Pages**: View complete rankings for any specific week
+- **Search**: Find specific weeks or players
+- **Navigation**: Previous/Next week buttons and keyboard shortcuts
+- **API Endpoints**: Programmatic access at `/api/weeks` and `/api/week/{date}`
+
+## Deployment
+
+See [DEPLOYMENT.md](DEPLOYMENT.md) for detailed instructions on deploying to:
+- GitHub (pushing your code)
+- Render.com (recommended for beginners)
+- Railway
+- Fly.io
+- Heroku
+
+### Quick Deploy to GitHub
+```bash
+git add .
+git commit -m "Initial commit"
+git remote add origin https://github.com/YOUR_USERNAME/ATP-Rankings-Data-Visualization.git
+git push -u origin main
+```
+
+## Technologies Used
+- Python 3.12
+- SQLite3
+- BeautifulSoup4 (web scraping)
+- Matplotlib (data visualization)
+- FastAPI (web framework)
+- Jinja2 (HTML templates)
+- Uvicorn (ASGI server)
+
+## License
+See [LICENSE](LICENSE) file for details.

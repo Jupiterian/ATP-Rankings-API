@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ATP Rankings - {{ week_date }}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+        
+        .date {
+            color: #666;
+            font-size: 1.3em;
+            margin-bottom: 20px;
+        }
+        
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            gap: 10px;
+        }
+        
+        .nav-btn {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.3s;
+            display: inline-block;
+        }
+        
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        
+        .nav-btn.disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+        
+        .nav-btn.disabled:hover {
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .home-btn {
+            background: #28a745;
+        }
+        
+        .home-btn:hover {
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
+        }
+        
+        .search-box {
+            margin-bottom: 20px;
+        }
+        
+        .search-box input {
+            padding: 10px 15px;
+            width: 100%;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        
+        .search-box input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .rankings-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .rankings-table thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .rankings-table th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+        
+        .rankings-table tbody tr {
+            border-bottom: 1px solid #e9ecef;
+            transition: background-color 0.2s;
+        }
+        
+        .rankings-table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .rankings-table td {
+            padding: 12px 15px;
+        }
+        
+        .rank-cell {
+            font-weight: bold;
+            color: #667eea;
+            font-size: 1.1em;
+            width: 80px;
+        }
+        
+        .name-cell {
+            color: #333;
+            font-size: 1.05em;
+        }
+        
+        .points-cell {
+            color: #666;
+            font-style: italic;
+        }
+        
+        .top3 {
+            background: linear-gradient(135deg, #fff7e6 0%, #ffe8cc 100%);
+        }
+        
+        .rank1 .rank-cell {
+            color: #ffd700;
+            font-size: 1.3em;
+        }
+        
+        .rank2 .rank-cell {
+            color: #c0c0c0;
+            font-size: 1.2em;
+        }
+        
+        .rank3 .rank-cell {
+            color: #cd7f32;
+            font-size: 1.15em;
+        }
+        
+        .stats {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+            font-size: 1.1em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎾 ATP Rankings</h1>
+            <div class="date">{{ week_date }}</div>
+        </div>
+        
+        <div class="navigation">
+            {% if prev_week %}
+                <a href="/week/{{ prev_week }}" class="nav-btn">← Previous Week ({{ prev_week }})</a>
+            {% else %}
+                <span class="nav-btn disabled">← Previous Week</span>
+            {% endif %}
+            
+            <a href="/" class="nav-btn home-btn">🏠 Home</a>
+            
+            {% if next_week %}
+                <a href="/week/{{ next_week }}" class="nav-btn">Next Week ({{ next_week }}) →</a>
+            {% else %}
+                <span class="nav-btn disabled">Next Week →</span>
+            {% endif %}
+        </div>
+        
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="Search for a player...">
+        </div>
+        
+        <table class="rankings-table" id="rankingsTable">
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>Player</th>
+                    <th>Points</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for player in rankings %}
+                <tr class="{% if player.rank == '1' %}rank1 top3{% elif player.rank == '2' %}rank2 top3{% elif player.rank == '3' %}rank3 top3{% endif %}" data-player="{{ player.name|lower }}">
+                    <td class="rank-cell">{{ player.rank }}</td>
+                    <td class="name-cell">{{ player.name }}</td>
+                    <td class="points-cell">{{ player.points }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
+        <div class="stats">
+            <p>Total players ranked: <strong>{{ rankings|length }}</strong></p>
+        </div>
+    </div>
+    
+    <script>
+        // Search functionality
+        const searchInput = document.getElementById('searchInput');
+        const tableRows = document.querySelectorAll('#rankingsTable tbody tr');
+        
+        searchInput.addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            
+            tableRows.forEach(row => {
+                const playerName = row.getAttribute('data-player');
+                if (playerName.includes(searchTerm)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowLeft') {
+                const prevBtn = document.querySelector('.nav-btn[href*="prev"]');
+                if (prevBtn && !prevBtn.classList.contains('disabled')) {
+                    window.location.href = prevBtn.href;
+                }
+            } else if (e.key === 'ArrowRight') {
+                const nextBtn = document.querySelector('.nav-btn[href*="next"]');
+                if (nextBtn && !nextBtn.classList.contains('disabled')) {
+                    window.location.href = nextBtn.href;
+                }
+            } else if (e.key === 'Home' || e.key === 'h') {
+                window.location.href = '/';
+            }
+        });
+    </script>
+</body>
+</html>
