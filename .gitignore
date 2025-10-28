@@ -50,5 +50,4 @@ env/
 .coverage
 htmlcov/
 
-# Database (optional - uncomment if you want to exclude the database)
 # rankings.db
