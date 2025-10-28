@@ -30,15 +30,43 @@
         h1 {
             color: #333;
             text-align: center;
-            margin-bottom: 10px;
+            margin-bottom: 20px;
             font-size: 2.5em;
         }
         
-        .subtitle {
-            text-align: center;
-            color: #666;
+        .api-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
             margin-bottom: 40px;
-            font-size: 1.1em;
+            flex-wrap: wrap;
+        }
+        
+        .api-btn {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.95em;
+        }
+        
+        .api-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        
+        .api-btn.docs {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        
+        .api-btn.docs:hover {
+            box-shadow: 0 4px 12px rgba(245, 87, 108, 0.4);
         }
         
         .search-box {
@@ -155,8 +183,16 @@
 <body>
     <div class="container">
         <h1>🎾 ATP Rankings Database</h1>
-        <p class="subtitle">Explore historical ATP tennis rankings week by week</p>
-        <p class="subtitle">API: https://atp-rankings-data-visualization.onrender.com/api/weeks </p>
+        
+        <div class="api-buttons">
+            <a href="/api/weeks" class="api-btn" target="_blank">
+                <span>API: All Weeks</span>
+            </a>
+            <a href="/api-docs" class="api-btn docs">
+                <span>API Documentation</span>
+            </a>
+        </div>
+        
         <div class="search-box">
             <input type="text" id="searchInput" placeholder="Search for a specific week (e.g., 2023-01-02)...">
         </div>

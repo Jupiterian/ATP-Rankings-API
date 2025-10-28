@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Documentation - ATP Rankings</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 2.5em;
+        }
+        
+        .subtitle {
+            color: #666;
+            font-size: 1.1em;
+        }
+        
+        .nav-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+        
+        .nav-btn {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        
+        .nav-btn.home {
+            background: #28a745;
+        }
+        
+        .nav-btn.home:hover {
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
+        }
+        
+        .section {
+            margin-bottom: 40px;
+            padding: 30px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+        
+        h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+        
+        h3 {
+            color: #333;
+            margin-top: 25px;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+        
+        .endpoint {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .method {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 5px;
+            font-weight: bold;
+            font-size: 0.9em;
+            margin-right: 10px;
+        }
+        
+        .method.get {
+            background: #28a745;
+            color: white;
+        }
+        
+        .url {
+            font-family: 'Courier New', monospace;
+            background: #f8f9fa;
+            padding: 8px 12px;
+            border-radius: 5px;
+            display: inline-block;
+            margin-top: 10px;
+            color: #333;
+            font-size: 0.95em;
+        }
+        
+        .description {
+            margin-top: 15px;
+            color: #555;
+            line-height: 1.6;
+        }
+        
+        .parameters {
+            margin-top: 15px;
+        }
+        
+        .param-title {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 8px;
+        }
+        
+        .param {
+            background: #f8f9fa;
+            padding: 10px;
+            margin-bottom: 8px;
+            border-radius: 5px;
+            border-left: 3px solid #667eea;
+        }
+        
+        .param-name {
+            font-family: 'Courier New', monospace;
+            color: #667eea;
+            font-weight: bold;
+        }
+        
+        .param-type {
+            color: #999;
+            font-size: 0.9em;
+            font-style: italic;
+        }
+        
+        .response {
+            margin-top: 15px;
+        }
+        
+        .response-title {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 8px;
+        }
+        
+        .code-block {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.5;
+        }
+        
+        .try-button {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 8px 16px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 0.9em;
+            transition: all 0.3s;
+        }
+        
+        .try-button:hover {
+            background: #5568d3;
+            transform: translateY(-1px);
+        }
+        
+        .info-box {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        
+        .info-box strong {
+            color: #2196F3;
+        }
+        
+        .example-list {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .example-list li {
+            padding: 8px 0;
+            color: #555;
+        }
+        
+        .example-list li:before {
+            content: "▸ ";
+            color: #667eea;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📚 API Documentation</h1>
+            <p class="subtitle">RESTful API for ATP Rankings Historical Data</p>
+        </div>
+        
+        <div class="nav-buttons">
+            <a href="/" class="nav-btn home">
+                <span>🏠</span>
+                <span>Home</span>
+            </a>
+            <a href="/api/weeks" class="nav-btn" target="_blank">
+                <span>🔌</span>
+                <span>Try API: All Weeks</span>
+            </a>
+        </div>
+        
+        <!-- Introduction Section -->
+        <div class="section">
+            <h2>Introduction</h2>
+            <p class="description">
+                The ATP Rankings API provides programmatic access to historical ATP tennis rankings data spanning from 1973 to present. 
+                All endpoints return JSON responses and require no authentication.
+            </p>
+            
+            <div class="info-box">
+                <strong>Base URL:</strong> <code>{{ request.url.scheme }}://{{ request.url.netloc }}</code>
+            </div>
+            
+            <h3>Features</h3>
+            <ul class="example-list">
+                <li>Access over 2,600 weeks of ATP rankings data</li>
+                <li>Retrieve complete rankings for any specific week</li>
+                <li>JSON response format for easy integration</li>
+                <li>No rate limiting or authentication required</li>
+                <li>CORS enabled for browser-based applications</li>
+            </ul>
+        </div>
+        
+        <!-- Endpoints Section -->
+        <div class="section">
+            <h2>API Endpoints</h2>
+            
+            <!-- Endpoint 1: Get All Weeks -->
+            <div class="endpoint">
+                <h3>Get All Available Weeks</h3>
+                <div>
+                    <span class="method get">GET</span>
+                    <span class="url">/api/weeks</span>
+                </div>
+                
+                <div class="description">
+                    Returns a list of all available weeks (dates) for which rankings data is available. 
+                    Weeks are returned in descending chronological order (newest first).
+                </div>
+                
+                <div class="response">
+                    <div class="response-title">Response Example:</div>
+                    <pre class="code-block">{
+  "weeks": [
+    "2025-04-21",
+    "2025-04-14",
+    "2025-04-07",
+    "2025-03-31",
+    ...
+    "1973-09-03",
+    "1973-08-27"
+  ]
+}</pre>
+                </div>
+                
+                <a href="/api/weeks" class="try-button" target="_blank">Try it now →</a>
+            </div>
+            
+            <!-- Endpoint 2: Get Week Data -->
+            <div class="endpoint">
+                <h3>Get Rankings for a Specific Week</h3>
+                <div>
+                    <span class="method get">GET</span>
+                    <span class="url">/api/week/{week_date}</span>
+                </div>
+                
+                <div class="description">
+                    Returns the complete ATP rankings for a specific week, including rank, player name, and points for all ranked players.
+                </div>
+                
+                <div class="parameters">
+                    <div class="param-title">Path Parameters:</div>
+                    <div class="param">
+                        <span class="param-name">week_date</span>
+                        <span class="param-type">(string, required)</span>
+                        <div style="margin-top: 5px; color: #666;">
+                            The date of the week in YYYY-MM-DD format (e.g., "2023-01-02")
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="response">
+                    <div class="response-title">Response Example:</div>
+                    <pre class="code-block">{
+  "week": "2023-01-02",
+  "rankings": [
+    {
+      "rank": "1",
+      "name": "Carlos Alcaraz",
+      "points": "6,820"
+    },
+    {
+      "rank": "2",
+      "name": "Rafael Nadal",
+      "points": "6,020"
+    },
+    {
+      "rank": "3",
+      "name": "Stefanos Tsitsipas",
+      "points": "5,550"
+    },
+    ...
+  ]
+}</pre>
+                </div>
+                
+                <div class="response">
+                    <div class="response-title">Error Response (404):</div>
+                    <pre class="code-block">{
+  "detail": "Week 2099-01-01 not found"
+}</pre>
+                </div>
+                
+                <a href="/api/week/2023-01-02" class="try-button" target="_blank">Try with 2023-01-02 →</a>
+            </div>
+        </div>
+        
+        <!-- Usage Examples Section -->
+        <div class="section">
+            <h2>Usage Examples</h2>
+            
+            <h3>JavaScript (Fetch API)</h3>
+            <pre class="code-block">// Get all available weeks
+fetch('{{ request.url.scheme }}://{{ request.url.netloc }}/api/weeks')
+  .then(response => response.json())
+  .then(data => {
+    console.log('Total weeks:', data.weeks.length);
+    console.log('Latest week:', data.weeks[0]);
+  });
+
+// Get rankings for a specific week
+fetch('{{ request.url.scheme }}://{{ request.url.netloc }}/api/week/2023-01-02')
+  .then(response => response.json())
+  .then(data => {
+    console.log('Week:', data.week);
+    console.log('Number 1:', data.rankings[0]);
+  });</pre>
+            
+            <h3>Python (Requests)</h3>
+            <pre class="code-block">import requests
+
+# Get all available weeks
+response = requests.get('{{ request.url.scheme }}://{{ request.url.netloc }}/api/weeks')
+data = response.json()
+print(f"Total weeks: {len(data['weeks'])}")
+
+# Get rankings for a specific week
+response = requests.get('{{ request.url.scheme }}://{{ request.url.netloc }}/api/week/2023-01-02')
+data = response.json()
+print(f"Week: {data['week']}")
+print(f"Number 1: {data['rankings'][0]['name']}")</pre>
+            
+            <h3>cURL</h3>
+            <pre class="code-block"># Get all weeks
+curl {{ request.url.scheme }}://{{ request.url.netloc }}/api/weeks
+
+# Get specific week
+curl {{ request.url.scheme }}://{{ request.url.netloc }}/api/week/2023-01-02</pre>
+        </div>
+        
+        <!-- Response Format Section -->
+        <div class="section">
+            <h2>Response Format</h2>
+            
+            <h3>Content Type</h3>
+            <p class="description">All responses are returned in JSON format with <code>Content-Type: application/json</code></p>
+            
+            <h3>Status Codes</h3>
+            <ul class="example-list">
+                <li><strong>200 OK</strong> - Request successful</li>
+                <li><strong>404 Not Found</strong> - Week not found in database</li>
+                <li><strong>500 Internal Server Error</strong> - Server error occurred</li>
+            </ul>
+            
+            <h3>Data Structure</h3>
+            <p class="description">
+                <strong>Week Data Object:</strong>
+            </p>
+            <pre class="code-block">{
+  "rank": "string",     // Player's ranking position (e.g., "1", "2", "3")
+  "name": "string",     // Player's full name
+  "points": "string"    // Points with comma separators or "-" if not available
+}</pre>
+        </div>
+        
+        <!-- Best Practices Section -->
+        <div class="section">
+            <h2>✨ Best Practices</h2>
+            
+            <ul class="example-list">
+                <li><strong>Caching:</strong> Consider caching responses as historical data rarely changes</li>
+                <li><strong>Error Handling:</strong> Always check for 404 errors when requesting specific weeks</li>
+                <li><strong>Date Format:</strong> Use YYYY-MM-DD format for week dates (e.g., "2023-01-02")</li>
+                <li><strong>Pagination:</strong> The API returns complete datasets - implement client-side pagination if needed</li>
+                <li><strong>Rate Limiting:</strong> While there's no enforced rate limit, please be respectful with request frequency</li>
+            </ul>
+        </div>
+        
+        <!-- Support Section -->
+        <div class="section">
+            <h2>🆘 Support</h2>
+            
+            <p class="description">
+                For issues, questions, or feature requests, please visit the 
+                <a href="https://github.com/Jupiterian/ATP-Rankings-Data-Visualization" target="_blank" style="color: #667eea;">
+                    GitHub repository
+                </a>.
+            </p>
+            
+            <div class="info-box">
+                <strong>Note:</strong> This is a free, public API provided as-is. No SLA or uptime guarantees are provided.
+            </div>
+        </div>
+    </div>
+</body>
+</html>

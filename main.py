@@ -84,6 +84,15 @@ async def home(request: Request):
     )
 
 
+@app.get("/api-docs", response_class=HTMLResponse)
+async def api_documentation(request: Request):
+    """Render the API documentation page."""
+    return templates.TemplateResponse(
+        "api_docs.html",
+        {"request": request}
+    )
+
+
 @app.get("/week/{week_date}", response_class=HTMLResponse)
 async def week_page(request: Request, week_date: str):
     """Render a specific week's rankings page."""
