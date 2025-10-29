@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Player Stats & Comparison - ATP Rankings</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 2.5em;
+        }
+        
+        .subtitle {
+            color: #666;
+            font-size: 1.1em;
+        }
+        
+        .nav-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+        
+        .nav-btn {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        
+        .nav-btn.home {
+            background: #28a745;
+        }
+        
+        .search-section {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+        
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .search-box input {
+            flex: 1;
+            padding: 12px 20px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        
+        .search-box input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .search-box button {
+            padding: 12px 30px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .search-box button:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+        
+        .player-suggestions {
+            display: none;
+            background: white;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            position: relative;
+            z-index: 10;
+        }
+        
+        .player-suggestions.active {
+            display: block;
+        }
+        
+        .suggestion-item {
+            padding: 10px 20px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .suggestion-item:hover {
+            background: #f0f0f0;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            font-size: 1.2em;
+        }
+        
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #f5c6cb;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+        
+        .player-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 30px;
+            border-radius: 15px;
+            color: white;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            position: relative;
+            animation: slideIn 0.5s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .player-card h2 {
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+            padding-bottom: 10px;
+        }
+        
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .stat-item:last-child {
+            border-bottom: none;
+        }
+        
+        .stat-label {
+            font-weight: 500;
+            opacity: 0.9;
+        }
+        
+        .stat-value {
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+        
+        .close-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: rotate(90deg);
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+        
+        .no-results h3 {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        
+        .instructions {
+            background: #e7f3ff;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+            margin-bottom: 20px;
+        }
+        
+        .instructions h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .instructions ul {
+            list-style-position: inside;
+            color: #666;
+        }
+        
+        .instructions li {
+            margin: 5px 0;
+        }
+        
+        .charts-section {
+            margin-top: 40px;
+        }
+        
+        .chart-container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+        
+        .chart-container h3 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            text-align: center;
+        }
+        
+        .chart-wrapper {
+            position: relative;
+            height: 400px;
+        }
+        
+        .chart-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .chart-btn {
+            padding: 10px 20px;
+            background: #f0f0f0;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+        
+        .chart-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        
+        .chart-btn:hover {
+            border-color: #667eea;
+        }
+        
+        .selected-players {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        
+        .player-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 20px;
+            font-size: 0.9em;
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        .player-tag button {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .player-tag button:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Player Statistics & Comparison</h1>
+            <p class="subtitle">Search for players and view their career statistics and comparison charts</p>
+        </div>
+        
+        <div class="nav-buttons">
+            <a href="/" class="nav-btn home">
+                <span>🏠</span>
+                <span>Home</span>
+            </a>
+            <a href="/api-docs" class="nav-btn">
+                <span>📚</span>
+                <span>API Docs</span>
+            </a>
+        </div>
+        
+        <div class="instructions">
+            <h3>ℹ️ How to Use</h3>
+            <ul>
+                <li>Type a player's name in the search box below</li>
+                <li>Select a player from the suggestions or click "Search"</li>
+                <li>View detailed career statistics for each player</li>
+                <li>Add multiple players to compare their stats side-by-side</li>
+                <li>Use the chart buttons to visualize ranking/points progression</li>
+                <li>Click the × button to remove a player</li>
+            </ul>
+        </div>
+        
+        <div class="search-section">
+            <div class="search-box">
+                <input 
+                    type="text" 
+                    id="playerSearch" 
+                    placeholder="Search for a player (e.g., Roger Federer, Novak Djokovic, Rafael Nadal)..."
+                    autocomplete="off"
+                >
+                <button onclick="searchPlayer()">Search</button>
+            </div>
+            <div id="playerSuggestions" class="player-suggestions"></div>
+        </div>
+        
+        <div id="errorMessage"></div>
+        <div id="loadingMessage" class="loading" style="display: none;">Loading player data...</div>
+        
+        <div id="statsGrid" class="stats-grid"></div>
+        
+        <div id="noResults" class="no-results" style="display: none;">
+            <h3>🎾 No Players Selected</h3>
+            <p>Search for a player above to view their career statistics</p>
+        </div>
+        
+        <!-- Charts Section -->
+        <div id="chartsSection" class="charts-section" style="display: none;">
+            <h2 style="text-align: center; color: #333; margin-bottom: 30px;">📈 Career Progression Charts</h2>
+            
+            <div class="selected-players" id="selectedPlayers"></div>
+            
+            <div class="chart-controls">
+                <button class="chart-btn active" onclick="showChart('rankings')">📉 Rankings Over Time</button>
+                <button class="chart-btn" onclick="showChart('points')">📊 Points Over Time</button>
+            </div>
+            
+            <div class="chart-container" id="rankingsChartContainer">
+                <h3>Top 100 Rankings Over Time</h3>
+                <div class="chart-wrapper">
+                    <canvas id="rankingsChart"></canvas>
+                </div>
+            </div>
+            
+            <div class="chart-container" id="pointsChartContainer" style="display: none;">
+                <h3>Points Over Time</h3>
+                <div class="chart-wrapper">
+                    <canvas id="pointsChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let searchTimeout;
+        const playerSearch = document.getElementById('playerSearch');
+        const playerSuggestions = document.getElementById('playerSuggestions');
+        const statsGrid = document.getElementById('statsGrid');
+        const loadingMessage = document.getElementById('loadingMessage');
+        const errorMessage = document.getElementById('errorMessage');
+        const noResults = document.getElementById('noResults');
+        const chartsSection = document.getElementById('chartsSection');
+        const selectedPlayersDiv = document.getElementById('selectedPlayers');
+        
+        // Charts
+        let rankingsChart = null;
+        let pointsChart = null;
+        let playersData = [];
+        
+        // Show no results initially
+        noResults.style.display = 'block';
+        
+        // Player search with autocomplete
+        playerSearch.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            const query = this.value.trim();
+            
+            if (query.length < 2) {
+                playerSuggestions.classList.remove('active');
+                return;
+            }
+            
+            searchTimeout = setTimeout(() => {
+                fetch(`/api/players/search?q=${encodeURIComponent(query)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        displaySuggestions(data.players);
+                    })
+                    .catch(error => {
+                        console.error('Error fetching players:', error);
+                    });
+            }, 300);
+        });
+        
+        // Display player suggestions
+        function displaySuggestions(players) {
+            if (players.length === 0) {
+                playerSuggestions.classList.remove('active');
+                return;
+            }
+            
+            playerSuggestions.innerHTML = players.map(player => 
+                `<div class="suggestion-item" onclick="selectPlayer('${player}')">${player}</div>`
+            ).join('');
+            
+            playerSuggestions.classList.add('active');
+        }
+        
+        // Select a player from suggestions
+        function selectPlayer(playerName) {
+            playerSearch.value = playerName;
+            playerSuggestions.classList.remove('active');
+            searchPlayer();
+        }
+        
+        // Close suggestions when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!playerSearch.contains(e.target) && !playerSuggestions.contains(e.target)) {
+                playerSuggestions.classList.remove('active');
+            }
+        });
+        
+        // Handle Enter key
+        playerSearch.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchPlayer();
+            }
+        });
+        
+        // Search for player stats
+        async function searchPlayer() {
+            const playerName = playerSearch.value.trim();
+            
+            if (!playerName) {
+                showError('Please enter a player name');
+                return;
+            }
+            
+            playerSuggestions.classList.remove('active');
+            loadingMessage.style.display = 'block';
+            errorMessage.innerHTML = '';
+            
+            try {
+                const [factfileResponse, careerResponse] = await Promise.all([
+                    fetch(`/api/player/factfile?player=${encodeURIComponent(playerName)}`),
+                    fetch(`/api/player/career?player=${encodeURIComponent(playerName)}`)
+                ]);
+                
+                if (!factfileResponse.ok) {
+                    throw new Error('Player not found');
+                }
+                
+                const factfileData = await factfileResponse.json();
+                const careerData = await careerResponse.json();
+                
+                displayPlayerStats(factfileData);
+                addPlayerToCharts(playerName, careerData);
+                playerSearch.value = '';
+                noResults.style.display = 'none';
+                
+            } catch (error) {
+                showError(`Could not find player "${playerName}". Please check the spelling and try again.`);
+            } finally {
+                loadingMessage.style.display = 'none';
+            }
+        }
+        
+        // Display player statistics card
+        function displayPlayerStats(stats) {
+            const card = document.createElement('div');
+            card.className = 'player-card';
+            card.dataset.player = stats.player;
+            card.innerHTML = `
+                <button class="close-btn" onclick="removeCard(this, '${stats.player}')">×</button>
+                <h2>🎾 ${stats.player}</h2>
+                <div class="stat-item">
+                    <span class="stat-label">Career High Rank:</span>
+                    <span class="stat-value">#${stats.career_high_rank} (${stats.career_high_date})</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Most Points Ever:</span>
+                    <span class="stat-value">${stats.max_points} (${stats.max_points_date})</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Weeks in Top 100:</span>
+                    <span class="stat-value">${stats.weeks_top_100}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Weeks in Top 10:</span>
+                    <span class="stat-value">${stats.weeks_top_10}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Weeks at Number 1:</span>
+                    <span class="stat-value">${stats.weeks_at_1}</span>
+                </div>
+            `;
+            
+            statsGrid.appendChild(card);
+        }
+        
+        // Add player to charts
+        function addPlayerToCharts(playerName, careerData) {
+            console.log('Adding player to charts:', playerName);
+            console.log('Career data:', careerData);
+            
+            // Check if player already added
+            if (playersData.find(p => p.name === playerName)) {
+                showError('Player already added to comparison');
+                return;
+            }
+            
+            playersData.push({
+                name: playerName,
+                data: careerData
+            });
+            
+            console.log('Players data array:', playersData);
+            
+            updateSelectedPlayers();
+            updateCharts();
+            chartsSection.style.display = 'block';
+            
+            console.log('Charts section displayed');
+        }
+        
+        // Update selected players tags
+        function updateSelectedPlayers() {
+            selectedPlayersDiv.innerHTML = playersData.map(player => `
+                <div class="player-tag">
+                    <span>${player.name}</span>
+                    <button onclick="removePlayerFromChart('${player.name}')">×</button>
+                </div>
+            `).join('');
+        }
+        
+        // Remove player from chart
+        function removePlayerFromChart(playerName) {
+            playersData = playersData.filter(p => p.name !== playerName);
+            updateSelectedPlayers();
+            updateCharts();
+            
+            if (playersData.length === 0) {
+                chartsSection.style.display = 'none';
+            }
+        }
+        
+        // Generate colors for players
+        function getPlayerColor(index) {
+            const colors = [
+                '#667eea',
+                '#f093fb',
+                '#4facfe',
+                '#43e97b',
+                '#fa709a',
+                '#fee140',
+                '#30cfd0',
+                '#a8edea',
+                '#ff6b6b',
+                '#4ecdc4'
+            ];
+            return colors[index % colors.length];
+        }
+        
+        // Update charts
+        function updateCharts() {
+            console.log('updateCharts called, players count:', playersData.length);
+            
+            if (playersData.length === 0) {
+                console.log('No players data, skipping chart updates');
+                return;
+            }
+            
+            console.log('Updating rankings chart...');
+            updateRankingsChart();
+            console.log('Updating points chart...');
+            updatePointsChart();
+        }
+        
+        // Update rankings chart
+        function updateRankingsChart() {
+            console.log('updateRankingsChart called');
+            const ctx = document.getElementById('rankingsChart').getContext('2d');
+            console.log('Canvas context:', ctx);
+            
+            if (rankingsChart) {
+                console.log('Destroying existing rankings chart');
+                rankingsChart.destroy();
+            }
+            
+            const datasets = playersData.map((player, index) => ({
+                label: player.name,
+                data: player.data.rankings.map((rank, i) => ({
+                    x: player.data.ranking_dates[i],
+                    y: rank
+                })),
+                borderColor: getPlayerColor(index),
+                backgroundColor: getPlayerColor(index) + '20',
+                borderWidth: 2,
+                pointRadius: 0,
+                pointHoverRadius: 4,
+                tension: 0.1
+            }));
+            
+            console.log('Rankings datasets:', datasets);
+            console.log('Sample data points:', datasets[0]?.data?.slice(0, 3));
+            
+            rankingsChart = new Chart(ctx, {
+                type: 'line',
+                data: { datasets },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            reverse: true,
+                            min: 1,
+                            max: 100,
+                            ticks: {
+                                stepSize: 10
+                            },
+                            title: {
+                                display: true,
+                                text: 'Ranking'
+                            }
+                        },
+                        x: {
+                            type: 'time',
+                            time: {
+                                unit: 'year'
+                            },
+                            title: {
+                                display: true,
+                                text: 'Date'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false
+                        }
+                    },
+                    interaction: {
+                        mode: 'nearest',
+                        axis: 'x',
+                        intersect: false
+                    }
+                }
+            });
+            
+            console.log('Rankings chart created:', rankingsChart);
+        }
+        
+        // Update points chart
+        function updatePointsChart() {
+            const ctx = document.getElementById('pointsChart').getContext('2d');
+            
+            if (pointsChart) {
+                pointsChart.destroy();
+            }
+            
+            const datasets = playersData.map((player, index) => ({
+                label: player.name,
+                data: player.data.points.map((points, i) => ({
+                    x: player.data.points_dates[i],
+                    y: points
+                })),
+                borderColor: getPlayerColor(index),
+                backgroundColor: getPlayerColor(index) + '20',
+                borderWidth: 2,
+                pointRadius: 0,
+                pointHoverRadius: 4,
+                tension: 0.1
+            }));
+            
+            pointsChart = new Chart(ctx, {
+                type: 'line',
+                data: { datasets },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Points'
+                            }
+                        },
+                        x: {
+                            type: 'time',
+                            time: {
+                                unit: 'year'
+                            },
+                            title: {
+                                display: true,
+                                text: 'Date'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false
+                        }
+                    },
+                    interaction: {
+                        mode: 'nearest',
+                        axis: 'x',
+                        intersect: false
+                    }
+                }
+            });
+        }
+        
+        // Show chart
+        function showChart(type) {
+            const buttons = document.querySelectorAll('.chart-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            
+            if (type === 'rankings') {
+                event.target.classList.add('active');
+                document.getElementById('rankingsChartContainer').style.display = 'block';
+                document.getElementById('pointsChartContainer').style.display = 'none';
+            } else if (type === 'points') {
+                event.target.classList.add('active');
+                document.getElementById('rankingsChartContainer').style.display = 'none';
+                document.getElementById('pointsChartContainer').style.display = 'block';
+            }
+        }
+        
+        // Remove a player card
+        function removeCard(button, playerName) {
+            const card = button.parentElement;
+            card.style.animation = 'slideIn 0.3s ease-out reverse';
+            setTimeout(() => {
+                card.remove();
+                removePlayerFromChart(playerName);
+                if (statsGrid.children.length === 0) {
+                    noResults.style.display = 'block';
+                }
+            }, 300);
+        }
+        
+        // Show error message
+        function showError(message) {
+            errorMessage.innerHTML = `<div class="error">${message}</div>`;
+            setTimeout(() => {
+                errorMessage.innerHTML = '';
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

@@ -73,9 +73,12 @@ The application will be available at `http://localhost:8000`
 ### Features
 - **Home Page**: Browse all available weeks organized by year
 - **Week Pages**: View complete rankings for any specific week
+- **Player Comparison**: Interactive tool to compare player statistics and career graphs
+- **Weeks at #1**: Histogram showing all players and their weeks spent at world number 1
 - **Search**: Find specific weeks or players
 - **Navigation**: Previous/Next week buttons and keyboard shortcuts
-- **API Endpoints**: Programmatic access at `/api/weeks` and `/api/week/{date}`
+- **API Endpoints**: RESTful API for programmatic access to all data
+- **API Documentation**: Complete documentation at `/api-docs`
 
 ## Deployment
 
@@ -102,6 +105,7 @@ git push -u origin main
 - FastAPI (web framework)
 - Jinja2 (HTML templates)
 - Uvicorn (ASGI server)
+- Chart.js (interactive charts)
 
 ## License
 See [LICENSE](LICENSE) file for details.

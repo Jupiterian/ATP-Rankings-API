@@ -247,6 +247,14 @@
                 <span>🏠</span>
                 <span>Home</span>
             </a>
+            <a href="/compare" class="nav-btn">
+                <span>📊</span>
+                <span>Compare Players</span>
+            </a>
+            <a href="/weeks-at-no1" class="nav-btn">
+                <span>🏆</span>
+                <span>Weeks at #1</span>
+            </a>
             <a href="/api/weeks" class="nav-btn" target="_blank">
                 <span>🔌</span>
                 <span>Try API: All Weeks</span>
@@ -269,6 +277,9 @@
             <ul class="example-list">
                 <li>Access over 2,600 weeks of ATP rankings data</li>
                 <li>Retrieve complete rankings for any specific week</li>
+                <li>Get historical weeks at number 1 statistics for all players</li>
+                <li>Interactive player comparison tool with career graphs</li>
+                <li>Weeks at #1 histogram visualization</li>
                 <li>JSON response format for easy integration</li>
                 <li>No rate limiting or authentication required</li>
                 <li>CORS enabled for browser-based applications</li>
@@ -367,6 +378,45 @@
                 
                 <a href="/api/week/2023-01-02" class="try-button" target="_blank">Try with 2023-01-02 →</a>
             </div>
+            
+            <!-- Endpoint 3: Get Weeks at No. 1 -->
+            <div class="endpoint">
+                <h3>Get Weeks at Number 1 for All Players</h3>
+                <div>
+                    <span class="method get">GET</span>
+                    <span class="url">/api/weeks-at-no1</span>
+                </div>
+                
+                <div class="description">
+                    Returns all players who have held the world number 1 ranking and the number of weeks they spent at #1. 
+                    Results are sorted by weeks in descending order.
+                </div>
+                
+                <div class="response">
+                    <div class="response-title">Response Example:</div>
+                    <pre class="code-block">[
+  {
+    "player": "Novak Djokovic",
+    "weeks": 428
+  },
+  {
+    "player": "Roger Federer",
+    "weeks": 310
+  },
+  {
+    "player": "Pete Sampras",
+    "weeks": 286
+  },
+  {
+    "player": "Rafael Nadal",
+    "weeks": 209
+  },
+  ...
+]</pre>
+                </div>
+                
+                <a href="/api/weeks-at-no1" class="try-button" target="_blank">Try it now →</a>
+            </div>
         </div>
         
         <!-- Usage Examples Section -->
@@ -388,6 +438,14 @@ fetch('{{ request.url.scheme }}://{{ request.url.netloc }}/api/week/2023-01-02')
   .then(data => {
     console.log('Week:', data.week);
     console.log('Number 1:', data.rankings[0]);
+  });
+
+// Get weeks at number 1 statistics
+fetch('{{ request.url.scheme }}://{{ request.url.netloc }}/api/weeks-at-no1')
+  .then(response => response.json())
+  .then(data => {
+    console.log('Total players who reached #1:', data.length);
+    console.log('Most weeks at #1:', data[0]);
   });</pre>
             
             <h3>Python (Requests)</h3>
@@ -402,14 +460,23 @@ print(f"Total weeks: {len(data['weeks'])}")
 response = requests.get('{{ request.url.scheme }}://{{ request.url.netloc }}/api/week/2023-01-02')
 data = response.json()
 print(f"Week: {data['week']}")
-print(f"Number 1: {data['rankings'][0]['name']}")</pre>
+print(f"Number 1: {data['rankings'][0]['name']}")
+
+# Get weeks at number 1 statistics
+response = requests.get('{{ request.url.scheme }}://{{ request.url.netloc }}/api/weeks-at-no1')
+data = response.json()
+print(f"Total players who reached #1: {len(data)}")
+print(f"Most weeks at #1: {data[0]['player']} with {data[0]['weeks']} weeks")</pre>
             
             <h3>cURL</h3>
             <pre class="code-block"># Get all weeks
 curl {{ request.url.scheme }}://{{ request.url.netloc }}/api/weeks
 
 # Get specific week
-curl {{ request.url.scheme }}://{{ request.url.netloc }}/api/week/2023-01-02</pre>
+curl {{ request.url.scheme }}://{{ request.url.netloc }}/api/week/2023-01-02
+
+# Get weeks at number 1
+curl {{ request.url.scheme }}://{{ request.url.netloc }}/api/weeks-at-no1</pre>
         </div>
         
         <!-- Response Format Section -->
