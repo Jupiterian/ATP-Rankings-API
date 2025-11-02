@@ -1,6 +1,6 @@
 ![Logo](Examples/WeeksatNo1Hist.png)
 # ATP-Rankings-Data-Visualization
-Python/SQLITE3 based project which scrapes data from the atptour.com and uses Matplotlib and database parsing for data visualization. Now includes a FastAPI web application to browse rankings data!
+Python/SQLITE3 based project which scrapes data from the atptour.com and uses Matplotlib and database parsing for data visualization. Now includes a FastAPI web application to browse rankings data! Accessible over https://atp-rankings-data-visualization.onrender.com
 
 ## Features
 - 🎾 **Data Scraping**: Automated collection of ATP rankings from atptour.com
@@ -28,7 +28,8 @@ The project is dependent on multiple python modules. In order to ensure you have
 ```
 pip install -r requirements.txt
 ```
-Additionally, update the database to get the latest rankings. The database file in this github only has the data up until 6/16/2025.
+Additionally, update the database to get the latest rankings. The database file in this github is up to date as of 10/27/2025. The webserver running on atp-rankings-data-visualization.onrender.com is fully up to date.
+
 ### 2. Database Maintenance
 The repository comes with two files: ```generate.py``` and ```filler.py```. ```Generate.py``` is only meant to serve as a completely clean regeneration of the database. Should you need to regenerate the entire database, in case of an accidental deletion, you can simply run the file. ```Generate.py``` also comes with a start date variable, so if the script stops in between, you can restart the generation where it left off.
 <br>
@@ -80,14 +81,6 @@ The application will be available at `http://localhost:8000`
 - **API Endpoints**: RESTful API for programmatic access to all data
 - **API Documentation**: Complete documentation at `/api-docs`
 
-## Deployment
-
-See [DEPLOYMENT.md](DEPLOYMENT.md) for detailed instructions on deploying to:
-- GitHub (pushing your code)
-- Render.com (recommended for beginners)
-- Railway
-- Fly.io
-- Heroku
 
 ### Quick Deploy to GitHub
 ```bash
