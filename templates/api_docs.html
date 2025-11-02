@@ -255,6 +255,18 @@
                 <span>🏆</span>
                 <span>Weeks at #1</span>
             </a>
+            <a href="/mcp/health" class="nav-btn" target="_blank">
+                <span>🤖</span>
+                <span>MCP Server</span>
+            </a>
+            <a href="/api/weeks" class="nav-btn" target="_blank">
+                <span>📊</span>
+                <span>Compare Players</span>
+            </a>
+            <a href="/weeks-at-no1" class="nav-btn">
+                <span>🏆</span>
+                <span>Weeks at #1</span>
+            </a>
             <a href="/api/weeks" class="nav-btn" target="_blank">
                 <span>🔌</span>
                 <span>Try API: All Weeks</span>
@@ -709,6 +721,35 @@ curl "{{ request.url.scheme }}://{{ request.url.netloc }}/api/player/career?play
                 <li><strong>Pagination:</strong> The API returns complete datasets - implement client-side pagination if needed</li>
                 <li><strong>Rate Limiting:</strong> While there's no enforced rate limit, please be respectful with request frequency</li>
             </ul>
+        </div>
+        
+        <!-- Support Section -->
+        <div class="section">
+            <h2>🤖 MCP Server (AI Integration)</h2>
+            
+            <p class="description">
+                This API also includes a <strong>Model Context Protocol (MCP)</strong> server for integration with AI assistants.
+                The MCP server provides the same data access through MCP-compliant endpoints.
+            </p>
+            
+            <h3>MCP Endpoints</h3>
+            <ul class="example-list">
+                <li><strong>Health Check:</strong> <code>GET /mcp/health</code></li>
+                <li><strong>Manifest:</strong> <code>GET /mcp/manifest</code></li>
+                <li><strong>Search Players:</strong> <code>POST /mcp/tools/search_players</code></li>
+                <li><strong>Player Factfile:</strong> <code>POST /mcp/tools/get_player_factfile</code></li>
+                <li><strong>Player Career:</strong> <code>POST /mcp/tools/get_player_career</code></li>
+                <li><strong>Weeks at #1:</strong> <code>GET /mcp/tools/get_weeks_at_no1</code></li>
+                <li><strong>All Weeks:</strong> <code>GET /mcp/tools/get_all_weeks</code></li>
+                <li><strong>Week Rankings:</strong> <code>POST /mcp/tools/get_week_rankings</code></li>
+            </ul>
+            
+            <p class="description">
+                For complete MCP documentation, see the 
+                <a href="https://github.com/Jupiterian/ATP-Rankings-Data-Visualization/blob/main/MCP_README.md" target="_blank" style="color: #667eea;">
+                    MCP_README.md
+                </a> file.
+            </p>
         </div>
         
         <!-- Support Section -->

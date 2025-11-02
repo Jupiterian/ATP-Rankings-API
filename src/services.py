@@ -1,18 +1,11 @@
-"""FastAPI application for ATP Rankings data visualization."""
-from fastapi import FastAPI, Request, HTTPException
-from fastapi.responses import HTMLResponse
-from fastapi.templating import Jinja2Templates
-from fastapi.staticfiles import StaticFiles
+"""
+Service layer for ATP Rankings data access.
+Contains reusable business logic for both REST API and MCP endpoints.
+"""
 import sqlite3
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Tuple
 from pathlib import Path
 
-app = FastAPI(title="ATP Rankings Database")
-
-# Setup templates
-templates = Jinja2Templates(directory="templates")
-
-# Database path
 DB_PATH = "rankings.db"
 
 
@@ -42,14 +35,13 @@ def get_week_data(week: str) -> List[Dict[str, Any]]:
     cur.execute("SELECT name FROM sqlite_master WHERE type='table' AND name=?;", (week,))
     if not cur.fetchone():
         conn.close()
-        raise HTTPException(status_code=404, detail=f"Week {week} not found")
+        raise ValueError(f"Week {week} not found")
     
     # Get data from the week table
     cur.execute(f'SELECT * FROM "{week}";')
     rows = cur.fetchall()
     conn.close()
     
-    # Convert to list of dicts
     data = []
     for row in rows:
         data.append({
@@ -61,103 +53,14 @@ def get_week_data(week: str) -> List[Dict[str, Any]]:
     return data
 
 
-@app.get("/", response_class=HTMLResponse)
-async def home(request: Request):
-    """Render the home page with all available weeks."""
-    weeks = get_all_weeks()
-    
-    # Group weeks by year for better organization
-    weeks_by_year = {}
-    for week in weeks:
-        year = week.split("-")[0]
-        if year not in weeks_by_year:
-            weeks_by_year[year] = []
-        weeks_by_year[year].append(week)
-    
-    return templates.TemplateResponse(
-        "index.html",
-        {
-            "request": request,
-            "weeks_by_year": weeks_by_year,
-            "total_weeks": len(weeks)
-        }
-    )
-
-
-@app.get("/api-docs", response_class=HTMLResponse)
-async def api_documentation(request: Request):
-    """Render the API documentation page."""
-    return templates.TemplateResponse(
-        "api_docs.html",
-        {"request": request}
-    )
-
-
-@app.get("/week/{week_date}", response_class=HTMLResponse)
-async def week_page(request: Request, week_date: str):
-    """Render a specific week's rankings page."""
-    try:
-        rankings = get_week_data(week_date)
-        all_weeks = get_all_weeks()
-        
-        # Find previous and next weeks for navigation
-        current_index = all_weeks.index(week_date)
-        prev_week = all_weeks[current_index + 1] if current_index + 1 < len(all_weeks) else None
-        next_week = all_weeks[current_index - 1] if current_index - 1 >= 0 else None
-        
-        return templates.TemplateResponse(
-            "week.html",
-            {
-                "request": request,
-                "week_date": week_date,
-                "rankings": rankings,
-                "prev_week": prev_week,
-                "next_week": next_week
-            }
-        )
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@app.get("/api/weeks")
-async def api_weeks():
-    """API endpoint to get all available weeks."""
-    return {"weeks": get_all_weeks()}
-
-
-@app.get("/api/week/{week_date}")
-async def api_week_data(week_date: str):
-    """API endpoint to get ranking data for a specific week."""
-    rankings = get_week_data(week_date)
-    return {"week": week_date, "rankings": rankings}
-
-
-@app.get("/compare", response_class=HTMLResponse)
-async def compare_page(request: Request):
-    """Render the player comparison/stats page."""
-    return templates.TemplateResponse("comparison.html", {"request": request})
-
-
-@app.get("/weeks-at-no1", response_class=HTMLResponse)
-async def weeks_at_no1_page(request: Request):
-    """Render the weeks at number 1 histogram page."""
-    return templates.TemplateResponse("weeks_at_no1.html", {"request": request})
-
-
-@app.get("/api/players/search")
-async def search_players(q: str, limit: int = 10):
+def search_players(query: str, limit: int = 10) -> List[str]:
     """Search for players in the database."""
     conn = get_db_connection()
     cur = conn.cursor()
     
-    # Get all tables
     tables = get_all_weeks()
-    
-    # Collect unique player names that match the query
     players = set()
-    search_query = q.lower()
+    search_query = query.lower()
     
     for table in tables[:100]:  # Search through recent tables for performance
         try:
@@ -165,7 +68,7 @@ async def search_players(q: str, limit: int = 10):
             rows = cur.fetchall()
             for row in rows:
                 players.add(row[0])
-                if len(players) >= limit * 2:  # Get more than needed to filter
+                if len(players) >= limit * 2:
                     break
         except:
             continue
@@ -177,11 +80,10 @@ async def search_players(q: str, limit: int = 10):
     
     # Sort and limit results
     sorted_players = sorted(list(players))[:limit]
-    return {"players": sorted_players}
+    return sorted_players
 
 
-@app.get("/api/player/factfile")
-async def get_player_factfile(player: str):
+def get_player_factfile(player: str) -> Dict[str, Any]:
     """Get player factfile/statistics."""
     conn = get_db_connection()
     cur = conn.cursor()
@@ -208,7 +110,7 @@ async def get_player_factfile(player: str):
     
     if not rankings:
         conn.close()
-        raise HTTPException(status_code=404, detail=f"Player {player} not found")
+        raise ValueError(f"Player {player} not found")
     
     # Calculate career high
     career_high = min(rankings)
@@ -260,8 +162,7 @@ async def get_player_factfile(player: str):
     }
 
 
-@app.get("/api/player/career")
-async def get_player_career(player: str):
+def get_player_career(player: str) -> Dict[str, Any]:
     """Get player career data for charting (rankings and points over time)."""
     conn = get_db_connection()
     cur = conn.cursor()
@@ -309,7 +210,7 @@ async def get_player_career(player: str):
     conn.close()
     
     if not rankings and not points:
-        raise HTTPException(status_code=404, detail=f"Player {player} not found")
+        raise ValueError(f"Player {player} not found")
     
     return {
         "player": player,
@@ -320,9 +221,8 @@ async def get_player_career(player: str):
     }
 
 
-@app.get("/api/weeks-at-no1")
-async def api_weeks_at_no1():
-    """API endpoint to get all players and their weeks at number 1."""
+def get_weeks_at_no1() -> List[Dict[str, Any]]:
+    """Get all players and their weeks at number 1."""
     conn = get_db_connection()
     cur = conn.cursor()
     
@@ -354,8 +254,3 @@ async def api_weeks_at_no1():
     result.sort(key=lambda x: x["weeks"], reverse=True)
     
     return result
-
-
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)

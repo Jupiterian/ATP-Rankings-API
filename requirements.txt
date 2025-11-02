@@ -4,3 +4,6 @@ requests
 fastapi
 uvicorn
 jinja2
+pytest
+httpx
+pydantic

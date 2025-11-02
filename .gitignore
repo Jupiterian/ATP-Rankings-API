@@ -49,5 +49,16 @@ env/
 .pytest_cache/
 .coverage
 htmlcov/
+.tox/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+*~
 
 # rankings.db

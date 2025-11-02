@@ -1,0 +1,107 @@
+{
+  "schema_version": "1.0.0",
+  "name": "atp-rankings-mcp",
+  "version": "1.0.0",
+  "description": "Model Context Protocol server for ATP Tennis Rankings historical data. Provides access to player statistics, career data, and rankings history from 1973 to present.",
+  "author": "ATP Rankings Data Visualization",
+  "license": "MIT",
+  "homepage": "https://github.com/Jupiterian/ATP-Rankings-Data-Visualization",
+  "capabilities": {
+    "tools": [
+      {
+        "name": "search_players",
+        "description": "Search for tennis players by name. Returns a list of matching player names from the ATP rankings database.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "query": {
+              "type": "string",
+              "description": "Search query (player name or partial name)"
+            },
+            "limit": {
+              "type": "integer",
+              "description": "Maximum number of results to return",
+              "default": 10
+            }
+          },
+          "required": ["query"]
+        }
+      },
+      {
+        "name": "get_player_factfile",
+        "description": "Get comprehensive career statistics for a tennis player including career high ranking, maximum points, weeks in top 100/10/1, and key dates.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "player": {
+              "type": "string",
+              "description": "Exact player name (e.g., 'Roger Federer', 'Rafael Nadal')"
+            }
+          },
+          "required": ["player"]
+        }
+      },
+      {
+        "name": "get_player_career",
+        "description": "Get time-series data of a player's ranking and points history throughout their career. Useful for generating charts and analyzing career progression.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "player": {
+              "type": "string",
+              "description": "Exact player name (e.g., 'Novak Djokovic', 'Carlos Alcaraz')"
+            }
+          },
+          "required": ["player"]
+        }
+      },
+      {
+        "name": "get_weeks_at_no1",
+        "description": "Get all players who have held the ATP world number 1 ranking and how many weeks they spent at #1. Results are sorted by weeks in descending order.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "min_weeks": {
+              "type": "integer",
+              "description": "Filter to only show players with at least this many weeks at #1",
+              "default": 1
+            },
+            "top_n": {
+              "type": "integer",
+              "description": "Limit results to top N players by weeks",
+              "default": 50
+            }
+          }
+        }
+      },
+      {
+        "name": "get_all_weeks",
+        "description": "Get a list of all available weeks (dates) for which ATP rankings data is available. Useful for exploring the dataset coverage.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {}
+        }
+      },
+      {
+        "name": "get_week_rankings",
+        "description": "Get the complete ATP rankings table for a specific week, including rank, player name, and points for all ranked players.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "week": {
+              "type": "string",
+              "description": "Week date in YYYY-MM-DD format (e.g., '2023-01-02')"
+            }
+          },
+          "required": ["week"]
+        }
+      }
+    ],
+    "resources": []
+  },
+  "endpoints": {
+    "base_url": "/mcp",
+    "health": "/health",
+    "manifest": "/manifest"
+  }
+}
