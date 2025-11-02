@@ -9,7 +9,7 @@ from typing import List, Dict, Any
 from pathlib import Path
 
 # Import service layer and MCP router
-from src.services import (
+from .services import (
     get_all_weeks,
     get_week_data,
     search_players as service_search_players,
@@ -17,7 +17,7 @@ from src.services import (
     get_player_career as service_get_player_career,
     get_weeks_at_no1 as service_get_weeks_at_no1
 )
-from src.mcp_router import router as mcp_router
+from .mcp_router import router as mcp_router
 
 app = FastAPI(title="ATP Rankings Database")
 

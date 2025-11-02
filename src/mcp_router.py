@@ -9,7 +9,7 @@ from typing import Optional, Any, Dict
 import json
 from pathlib import Path
 
-from src.services import (
+from .services import (
     search_players,
     get_player_factfile,
     get_player_career,
