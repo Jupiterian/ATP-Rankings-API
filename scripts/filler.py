@@ -6,12 +6,17 @@ import sqlite3
 from bs4 import BeautifulSoup as bs
 import time
 from datetime import date, datetime, timedelta
+import os
+
+# Get the project root directory (parent of scripts/)
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+db_path = os.path.join(project_root, 'rankings.db')
 
 #Request Dates
 singles = requests.Session()
 weeks = singles.get(url="https://www.atptour.com/en/rankings/singles", timeout=5)
 soup = bs(weeks.content, "html.parser")
-conn = sqlite3.connect('rankings.db')
+conn = sqlite3.connect(db_path)
 cursor = conn.cursor()
 #Extract Rankings for dates
 dates = extract_weeks(soup)
@@ -76,5 +81,4 @@ def drop_tables(db_path, start_str, end_str):
                 print(f"Error dropping {table}: {e}")
         conn.commit()
 
-db_file = "rankings.db"
-drop_tables(db_file, "2020-03-23", "2020-08-17")
+drop_tables(db_path, "2020-03-23", "2020-08-17")

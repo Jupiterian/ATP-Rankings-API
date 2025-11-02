@@ -2,8 +2,13 @@ import requests
 from bs4 import BeautifulSoup as bs
 import sqlite3
 import time
+import os
 
-conn = sqlite3.connect("rankings.db")
+# Get the project root directory (parent of scripts/)
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+db_path = os.path.join(project_root, 'rankings.db')
+
+conn = sqlite3.connect(db_path)
 
 def extract_text(soup, element_class):
     tags = soup.find_all(class_=element_class)

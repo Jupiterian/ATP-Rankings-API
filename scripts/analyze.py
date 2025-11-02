@@ -4,9 +4,14 @@ import sqlite3
 import matplotlib.pyplot as plt
 from datetime import datetime
 from collections import Counter
+import os
+
+# Get the project root directory (parent of scripts/)
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+db_path = os.path.join(project_root, 'rankings.db')
 
 #Connect to Database
-conn = sqlite3.connect("rankings.db")
+conn = sqlite3.connect(db_path)
 cur = conn.cursor()
 
 def helpMenu():

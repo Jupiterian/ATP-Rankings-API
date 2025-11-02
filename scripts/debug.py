@@ -1,7 +1,12 @@
 #Find tables with only one row (may cause some issues)
 import sqlite3
+import os
 
-conn = sqlite3.connect("rankings.db")
+# Get the project root directory (parent of scripts/)
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+db_path = os.path.join(project_root, 'rankings.db')
+
+conn = sqlite3.connect(db_path)
 cursor = conn.cursor()
 
 cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name NOT LIKE 'temp_%'")
