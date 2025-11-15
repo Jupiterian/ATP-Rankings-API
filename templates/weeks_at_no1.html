@@ -4,200 +4,170 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Weeks at No. 1 - ATP Rankings</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='css/theme.css') }}">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--color-bg);
+            background-image: var(--color-bg-gradient);
             min-height: 100vh;
-            padding: 20px;
         }
 
         .container {
-            max-width: 1400px;
+            width: min(1400px, 100% - 32px);
             margin: 0 auto;
+            padding: clamp(1.5rem, 3vw, 3rem) 0 4rem;
         }
 
         header {
             text-align: center;
-            color: white;
-            margin-bottom: 30px;
+            margin-bottom: 2rem;
+            color: var(--color-text);
         }
 
         header h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+            margin-bottom: 0.4rem;
         }
 
         header p {
-            font-size: 1.1rem;
-            opacity: 0.9;
+            margin: 0;
+            color: var(--color-muted);
         }
 
         .nav-buttons {
             display: flex;
-            gap: 10px;
+            gap: 0.75rem;
             justify-content: center;
-            margin-bottom: 30px;
             flex-wrap: wrap;
+            margin-bottom: 1.5rem;
         }
 
         .nav-button {
-            background: white;
-            color: #667eea;
-            padding: 12px 24px;
-            border-radius: 8px;
-            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--radius-pill);
+            background: rgba(37, 99, 235, 0.08);
+            border: 1px solid rgba(37, 99, 235, 0.2);
+            color: var(--color-primary);
             font-weight: 600;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            text-decoration: none;
         }
 
         .nav-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-soft);
         }
 
-        .controls {
-            background: white;
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 30px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-
-        .controls h3 {
-            margin-bottom: 15px;
-            color: #333;
+        .controls,
+        .chart-container {
+            background: var(--color-surface);
+            border-radius: var(--radius-xl);
+            padding: clamp(1.25rem, 2vw, 2.5rem);
+            box-shadow: var(--shadow-md);
+            border: 1px solid rgba(226, 232, 240, 0.7);
+            margin-bottom: 2rem;
         }
 
         .control-group {
             display: flex;
-            gap: 15px;
-            align-items: center;
+            gap: 1rem;
             flex-wrap: wrap;
+            align-items: center;
         }
 
         .control-group label {
             font-weight: 600;
-            color: #555;
+            color: var(--color-muted);
         }
 
         .control-group input,
         .control-group select {
-            padding: 8px 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 6px;
-            font-size: 1rem;
-            min-width: 100px;
+            border-radius: var(--radius-md);
+            border: 1.5px solid var(--color-border);
+            padding: 0.65rem 0.9rem;
+            min-width: 120px;
         }
 
-        .control-group input:focus,
-        .control-group select:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-
-        .chart-container {
-            background: white;
-            border-radius: 12px;
-            padding: 30px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-
-        .chart-container h2 {
-            margin-bottom: 20px;
-            color: #333;
-            text-align: center;
-        }
-
-        .chart-wrapper {
-            position: relative;
-            min-height: 600px;
-            margin-top: 20px;
+        .controls button {
+            border: none;
+            border-radius: var(--radius-pill);
+            padding: 0.7rem 1.6rem;
+            font-weight: 600;
+            background: var(--color-primary);
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 12px 30px rgba(37, 99, 235, 0.25);
         }
 
         .stats-summary {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-bottom: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.25rem;
         }
 
         .stat-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 20px;
-            border-radius: 8px;
+            background: var(--color-surface-soft);
+            border-radius: var(--radius-lg);
+            padding: 1.25rem;
+            border: 1px solid rgba(226, 232, 240, 0.8);
             text-align: center;
         }
 
         .stat-card .value {
             font-size: 2rem;
-            font-weight: bold;
-            margin-bottom: 5px;
+            font-weight: 700;
+            color: var(--color-primary);
         }
 
         .stat-card .label {
-            font-size: 0.9rem;
-            opacity: 0.9;
+            color: var(--color-muted);
+            font-size: 0.95rem;
+        }
+
+        .chart-wrapper {
+            position: relative;
+            min-height: 600px;
         }
 
         .loading {
             text-align: center;
-            padding: 40px;
-            color: #666;
-            font-size: 1.1rem;
-        }
-
-        .loading::after {
-            content: '...';
-            animation: dots 1.5s steps(4, end) infinite;
-        }
-
-        @keyframes dots {
-            0%, 20% { content: '.'; }
-            40% { content: '..'; }
-            60%, 100% { content: '...'; }
+            color: var(--color-muted);
+            padding: 2.5rem 1rem;
         }
 
         @media (max-width: 768px) {
-            header h1 {
-                font-size: 1.8rem;
-            }
-
             .chart-wrapper {
-                height: 400px;
+                min-height: 420px;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
+    <div class="page-shell">
+        <header class="section-heading" style="text-align: center;">
+            <p class="chip" style="margin: 0 auto;">Flagship Insight</p>
             <h1>🏆 Weeks at Number 1</h1>
-            <p>Complete historical ranking of players by weeks spent at world #1</p>
+            <p>Explore the full history of ATP players who held the top spot and how long they dominated.</p>
         </header>
 
-        <div class="nav-buttons">
-            <a href="/" class="nav-button">← Home</a>
-            <a href="/compare" class="nav-button">Player Comparison</a>
-            <a href="/api-docs" class="nav-button">API Docs</a>
+        <div class="button-row" style="justify-content: center;">
+            <a href="/" class="btn">← Home</a>
+            <a href="/compare" class="btn btn--secondary">Player Comparison</a>
+            <a href="/api-docs" class="btn btn--ghost">API Docs</a>
         </div>
 
-        <div class="controls">
-            <h3>Filter Options</h3>
+        <div class="subtle-card controls">
+            <div class="section-heading" style="margin-bottom: 1rem;">
+                <h2 style="font-size: 1.35rem;">Filter the leaderboard</h2>
+                <p>Focus on a specific slice by minimum weeks or limit the leaderboard size.</p>
+            </div>
             <div class="control-group">
-                <label for="minWeeks">Minimum Weeks:</label>
+                <label for="minWeeks">Minimum Weeks</label>
                 <input type="number" id="minWeeks" value="1" min="1" max="500">
                 
-                <label for="topN">Show Top:</label>
+                <label for="topN">Show Top</label>
                 <select id="topN">
                     <option value="10">Top 10</option>
                     <option value="20" selected>Top 20</option>
@@ -206,7 +176,7 @@
                     <option value="all">All Players</option>
                 </select>
                 
-                <button onclick="updateChart()" class="nav-button">Update Chart</button>
+                <button onclick="updateChart()" class="btn btn--primary">Update Chart</button>
             </div>
         </div>
 
@@ -231,8 +201,11 @@
             </div>
         </div>
 
-        <div class="chart-container">
-            <h2>Weeks at World Number 1</h2>
+        <div class="surface-card chart-container">
+            <div class="section-heading" style="margin-bottom: 1rem;">
+                <h2 style="margin-bottom: 0.2rem;">Weeks at World Number 1</h2>
+                <p>Each bar highlights how long a player held the top ranking. Hover to see exact totals.</p>
+            </div>
             <div id="loading" class="loading">Loading data</div>
             <div class="chart-wrapper" id="chartWrapper" style="display: none;">
                 <canvas id="weeksChart"></canvas>

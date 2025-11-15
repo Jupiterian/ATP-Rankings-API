@@ -4,234 +4,215 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>API Documentation - ATP Rankings</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='css/theme.css') }}">
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: var(--font-base);
+            background: var(--color-bg);
+            background-image: var(--color-bg-gradient);
             min-height: 100vh;
-            padding: 20px;
+            padding: clamp(1.5rem, 4vw, 3rem) 0;
         }
-        
+
         .container {
-            max-width: 1200px;
+            width: min(1200px, 100% - 32px);
             margin: 0 auto;
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
         }
-        
+
         .header {
             text-align: center;
-            margin-bottom: 40px;
+            padding: clamp(1.5rem, 4vw, 3rem);
+            background: var(--color-surface);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-lg);
+            border: 1px solid rgba(255, 255, 255, 0.7);
         }
-        
+
         h1 {
-            color: #333;
-            margin-bottom: 15px;
-            font-size: 2.5em;
+            color: var(--color-text);
+            margin-bottom: 0.5rem;
+            font-size: clamp(2rem, 4vw, 2.75rem);
         }
-        
+
         .subtitle {
-            color: #666;
-            font-size: 1.1em;
+            color: var(--color-muted);
+            font-size: 1.05rem;
         }
-        
-        .nav-buttons {
-            display: flex;
+
+        .button-row {
             justify-content: center;
-            gap: 15px;
-            margin-bottom: 40px;
-            flex-wrap: wrap;
         }
-        
-        .nav-btn {
-            padding: 10px 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            text-decoration: none;
-            border-radius: 8px;
-            font-weight: 500;
-            transition: all 0.3s;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .nav-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-        }
-        
-        .nav-btn.home {
-            background: #28a745;
-        }
-        
-        .nav-btn.home:hover {
-            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
-        }
-        
+
         .section {
-            margin-bottom: 40px;
-            padding: 30px;
-            background: #f8f9fa;
-            border-radius: 10px;
-            border-left: 4px solid #667eea;
+            background: var(--color-surface);
+            border-radius: var(--radius-xl);
+            padding: clamp(1.5rem, 3vw, 2.75rem);
+            box-shadow: var(--shadow-md);
+            border: 1px solid rgba(226, 232, 240, 0.7);
         }
-        
+
         h2 {
-            color: #667eea;
-            margin-bottom: 20px;
-            font-size: 1.8em;
+            color: var(--color-text);
+            margin-bottom: 1rem;
+            font-size: clamp(1.5rem, 3vw, 2rem);
         }
-        
+
         h3 {
-            color: #333;
-            margin-top: 25px;
-            margin-bottom: 15px;
-            font-size: 1.3em;
+            color: var(--color-text);
+            margin: 1.5rem 0 0.75rem;
+            font-size: 1.2rem;
         }
-        
+
         .endpoint {
-            background: white;
-            padding: 20px;
-            margin-bottom: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            background: var(--color-surface-soft);
+            padding: 1.25rem;
+            border-radius: var(--radius-lg);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            margin-bottom: 1.25rem;
+            box-shadow: var(--shadow-soft);
         }
-        
+
         .method {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 5px;
-            font-weight: bold;
-            font-size: 0.9em;
-            margin-right: 10px;
+            display: inline-flex;
+            padding: 0.4rem 0.9rem;
+            border-radius: var(--radius-pill);
+            font-weight: 700;
+            font-size: 0.85rem;
+            letter-spacing: 0.05em;
+            background: rgba(34, 197, 94, 0.15);
+            color: var(--color-success);
         }
-        
-        .method.get {
-            background: #28a745;
-            color: white;
-        }
-        
+
         .url {
-            font-family: 'Courier New', monospace;
-            background: #f8f9fa;
-            padding: 8px 12px;
-            border-radius: 5px;
-            display: inline-block;
-            margin-top: 10px;
-            color: #333;
-            font-size: 0.95em;
+            font-family: 'JetBrains Mono', 'Courier New', monospace;
+            background: rgba(15, 23, 42, 0.04);
+            padding: 0.55rem 0.9rem;
+            border-radius: var(--radius-md);
+            display: inline-flex;
+            margin-top: 0.5rem;
+            color: var(--color-text);
+            font-size: 0.95rem;
         }
-        
+
         .description {
-            margin-top: 15px;
-            color: #555;
-            line-height: 1.6;
+            margin-top: 0.75rem;
+            color: var(--color-muted);
+            line-height: 1.7;
         }
-        
-        .parameters {
-            margin-top: 15px;
+
+        .parameters,
+        .response {
+            margin-top: 1rem;
         }
-        
-        .param-title {
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 8px;
+
+        .param-title,
+        .response-title {
+            font-weight: 700;
+            color: var(--color-text);
+            margin-bottom: 0.45rem;
         }
-        
+
         .param {
-            background: #f8f9fa;
-            padding: 10px;
-            margin-bottom: 8px;
-            border-radius: 5px;
-            border-left: 3px solid #667eea;
+            background: white;
+            padding: 0.9rem;
+            margin-bottom: 0.6rem;
+            border-radius: var(--radius-md);
+            border: 1px dashed rgba(37, 99, 235, 0.25);
         }
-        
+
         .param-name {
-            font-family: 'Courier New', monospace;
-            color: #667eea;
-            font-weight: bold;
+            font-family: 'JetBrains Mono', 'Courier New', monospace;
+            color: var(--color-primary);
+            font-weight: 600;
         }
-        
+
         .param-type {
-            color: #999;
-            font-size: 0.9em;
+            color: var(--color-muted);
+            font-size: 0.9rem;
             font-style: italic;
         }
-        
-        .response {
-            margin-top: 15px;
-        }
-        
-        .response-title {
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 8px;
-        }
-        
+
         .code-block {
-            background: #2d2d2d;
-            color: #f8f8f2;
-            padding: 15px;
-            border-radius: 5px;
+            background: #0f172a;
+            color: #f8fafc;
+            padding: 1rem;
+            border-radius: var(--radius-md);
             overflow-x: auto;
-            font-family: 'Courier New', monospace;
-            font-size: 0.9em;
-            line-height: 1.5;
+            font-family: 'JetBrains Mono', 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            border: 1px solid rgba(15, 23, 42, 0.4);
         }
-        
+
         .try-button {
-            display: inline-block;
-            margin-top: 10px;
-            padding: 8px 16px;
-            background: #667eea;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            margin-top: 0.75rem;
+            padding: 0.65rem 1.2rem;
+            background: var(--color-primary);
             color: white;
             text-decoration: none;
-            border-radius: 5px;
-            font-size: 0.9em;
-            transition: all 0.3s;
+            border-radius: var(--radius-pill);
+            font-size: 0.95rem;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 12px 24px rgba(37, 99, 235, 0.3);
         }
-        
+
         .try-button:hover {
-            background: #5568d3;
-            transform: translateY(-1px);
+            transform: translateY(-2px);
         }
-        
+
         .info-box {
-            background: #e7f3ff;
-            border-left: 4px solid #2196F3;
-            padding: 15px;
-            margin: 20px 0;
-            border-radius: 5px;
+            background: var(--color-surface-soft);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--color-border);
+            padding: 1rem 1.25rem;
+            margin: 1.25rem 0;
+            color: var(--color-text);
+            display: inline-flex;
+            gap: 0.5rem;
+            align-items: center;
         }
-        
-        .info-box strong {
-            color: #2196F3;
+
+        .info-box code {
+            font-family: 'JetBrains Mono', 'Courier New', monospace;
+            background: rgba(15, 23, 42, 0.06);
+            padding: 0.35rem 0.6rem;
+            border-radius: var(--radius-md);
         }
-        
+
         .example-list {
             list-style: none;
             padding-left: 0;
+            margin: 1rem 0 0;
         }
-        
+
         .example-list li {
-            padding: 8px 0;
-            color: #555;
+            padding: 0.35rem 0;
+            color: var(--color-muted);
         }
-        
-        .example-list li:before {
-            content: "▸ ";
-            color: #667eea;
-            font-weight: bold;
-            margin-right: 8px;
+
+        .example-list li::before {
+            content: "▸";
+            color: var(--color-primary);
+            margin-right: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .section,
+            .header {
+                padding: 1.25rem;
+            }
         }
     </style>
 </head>
@@ -242,35 +223,12 @@
             <p class="subtitle">RESTful API for ATP Rankings Historical Data</p>
         </div>
         
-        <div class="nav-buttons">
-            <a href="/" class="nav-btn home">
-                <span>🏠</span>
-                <span>Home</span>
-            </a>
-            <a href="/compare" class="nav-btn">
-                <span>📊</span>
-                <span>Compare Players</span>
-            </a>
-            <a href="/weeks-at-no1" class="nav-btn">
-                <span>🏆</span>
-                <span>Weeks at #1</span>
-            </a>
-            <a href="/mcp/health" class="nav-btn" target="_blank">
-                <span>🤖</span>
-                <span>MCP Server</span>
-            </a>
-            <a href="/api/weeks" class="nav-btn" target="_blank">
-                <span>📊</span>
-                <span>Compare Players</span>
-            </a>
-            <a href="/weeks-at-no1" class="nav-btn">
-                <span>🏆</span>
-                <span>Weeks at #1</span>
-            </a>
-            <a href="/api/weeks" class="nav-btn" target="_blank">
-                <span>🔌</span>
-                <span>Try API: All Weeks</span>
-            </a>
+        <div class="button-row">
+            <a href="/" class="btn">🏠 Home</a>
+            <a href="/compare" class="btn btn--secondary">📊 Compare Players</a>
+            <a href="/weeks-at-no1" class="btn">🏆 Weeks at #1</a>
+            <a href="/mcp/health" class="btn btn--ghost" target="_blank">🤖 MCP Health</a>
+            <a href="/api/weeks" class="btn btn--primary" target="_blank">🔌 Try /api/weeks</a>
         </div>
         
         <!-- Introduction Section -->

@@ -4,256 +4,200 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ATP Rankings Database</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='css/theme.css') }}">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            padding: 40px;
-        }
-        
-        h1 {
-            color: #333;
-            text-align: center;
-            margin-bottom: 20px;
-            font-size: 2.5em;
-        }
-        
-        .api-buttons {
+        .hero-card {
             display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin-bottom: 40px;
-            flex-wrap: wrap;
+            flex-direction: column;
+            gap: 1.5rem;
+            background: linear-gradient(140deg, rgba(37, 99, 235, 0.1), rgba(14, 165, 233, 0.08)), var(--color-surface);
+            position: relative;
+            overflow: hidden;
         }
-        
-        .api-btn {
-            padding: 10px 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            text-decoration: none;
-            border-radius: 8px;
-            font-weight: 500;
-            transition: all 0.3s;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.95em;
+
+        .hero-card::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.6), transparent 45%);
+            pointer-events: none;
         }
-        
-        .api-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
         }
-        
-        .api-btn.docs {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+
+        .hero-actions {
+            position: relative;
+            z-index: 1;
         }
-        
-        .api-btn.docs:hover {
-            box-shadow: 0 4px 12px rgba(245, 87, 108, 0.4);
+
+        .hero-stats {
+            position: relative;
+            z-index: 1;
         }
-        
-        .search-box {
-            margin-bottom: 30px;
-            text-align: center;
+
+        .hero-stat-card {
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: var(--radius-lg);
+            padding: 1.25rem;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: var(--shadow-soft);
         }
-        
-        .search-box input {
-            padding: 12px 20px;
-            width: 100%;
-            max-width: 500px;
-            border: 2px solid #ddd;
-            border-radius: 25px;
-            font-size: 16px;
-            transition: border-color 0.3s;
+
+        .hero-stat-card strong {
+            display: block;
+            font-size: 2rem;
+            color: var(--color-primary);
         }
-        
-        .search-box input:focus {
-            outline: none;
-            border-color: #667eea;
+
+        .hero-stat-card span {
+            color: var(--color-muted);
+            font-size: 0.95rem;
         }
-        
-        .year-section {
-            margin-bottom: 30px;
-        }
-        
-        .year-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 15px 20px;
-            border-radius: 10px;
-            margin-bottom: 15px;
-            font-size: 1.5em;
-            font-weight: bold;
-            cursor: pointer;
-            user-select: none;
+
+        .search-stack {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
+            flex-direction: column;
+            gap: 1rem;
         }
-        
-        .year-header:hover {
-            opacity: 0.9;
+
+        .info-callout {
+            display: flex;
+            gap: 0.75rem;
+            align-items: flex-start;
+            background: var(--color-surface-soft);
+            border-radius: var(--radius-lg);
+            padding: 1rem 1.25rem;
+            border-left: 4px solid var(--color-primary);
+            color: var(--color-muted);
+            font-size: 0.95rem;
         }
-        
-        .toggle-icon {
-            transition: transform 0.3s;
+
+        .info-callout strong {
+            color: var(--color-text);
         }
-        
-        .year-header.collapsed .toggle-icon {
-            transform: rotate(-90deg);
-        }
-        
-        .weeks-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            gap: 10px;
-            padding: 10px;
-            max-height: 400px;
+
+        .week-grid {
+            max-height: 340px;
             overflow-y: auto;
         }
-        
-        .weeks-grid.collapsed {
-            display: none;
+
+        .stat-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            color: var(--color-muted);
+            font-size: 0.9rem;
         }
-        
-        .week-link {
-            display: block;
-            padding: 12px;
-            background: #f8f9fa;
-            border: 2px solid #e9ecef;
-            border-radius: 8px;
-            text-decoration: none;
-            color: #495057;
-            text-align: center;
-            transition: all 0.3s;
-            font-weight: 500;
-        }
-        
-        .week-link:hover {
-            background: #667eea;
-            color: white;
-            border-color: #667eea;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-        }
-        
-        .stats {
-            text-align: center;
-            margin-top: 40px;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 10px;
-        }
-        
-        .stats h2 {
-            color: #333;
-            margin-bottom: 10px;
-        }
-        
-        .stats p {
-            color: #666;
-            font-size: 1.1em;
-        }
-        
-        .no-results {
-            text-align: center;
-            padding: 40px;
-            color: #999;
-            font-size: 1.2em;
+
+        @media (max-width: 768px) {
+            .hero-stat-card strong {
+                font-size: 1.4rem;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>🎾 ATP Rankings Database</h1>
-        
-        <div class="api-buttons">
-            <a href="/api/weeks" class="api-btn" target="_blank">
-                <span>API: All Weeks</span>
-            </a>
-            <a href="/api-docs" class="api-btn docs">
-                <span>API Documentation</span>
-            </a>
-            <a href="/compare" class="api-btn docs">
-                <span>Compare Players</span>
-            </a>
-            <a href="/weeks-at-no1" class="api-btn">
-                <span>🏆 Weeks at #1</span>
-            </a>
-        </div>
-        
-        <div class="search-box">
-            <input type="text" id="searchInput" placeholder="Search for a specific week (e.g., 2023-01-02)...">
-        </div>
-        
-        <div id="weeksContainer">
-            {% for year in weeks_by_year.keys()|sort(reverse=True) %}
-            <div class="year-section" data-year="{{ year }}">
-                <div class="year-header" onclick="toggleYear('{{ year }}')">
-                    <span>{{ year }}</span>
-                    <span class="toggle-icon">▼</span>
-                </div>
-                <div class="weeks-grid" id="weeks-{{ year }}">
-                    {% for week in weeks_by_year[year]|sort(reverse=True) %}
-                    <a href="/week/{{ week }}" class="week-link" data-week="{{ week }}">
-                        {{ week }}
-                    </a>
-                    {% endfor %}
+    <div class="page-shell">
+        <section class="surface-card hero-card">
+            <div class="hero-content">
+                <div class="chip">Historic ATP archive</div>
+                <div class="section-heading">
+                    <h1>Explore every ATP ranking week since 1973</h1>
+                    <p>Search 2,600+ Mondays of tennis history, compare players, and plug the data into your own tools or AI agents.</p>
                 </div>
             </div>
-            {% endfor %}
-        </div>
-        
-        <div class="stats">
-            <h2>Database Statistics</h2>
-            <p>Total weeks of rankings data: <strong>{{ total_weeks }}</strong></p>
-            <p>Years covered: <strong>{{ weeks_by_year.keys()|list|min }} - {{ weeks_by_year.keys()|list|max }}</strong></p>
-        </div>
+            <div class="hero-actions button-row">
+                <a href="/api-docs" class="btn btn--primary">📘 API documentation</a>
+                <a href="/api/weeks" class="btn btn--secondary" target="_blank">🔌 View raw weeks JSON</a>
+                <a href="/compare" class="btn">👥 Player comparison</a>
+                <a href="/weeks-at-no1" class="btn btn--ghost">🏆 Weeks at #1</a>
+                <a href="/mcp/health" class="btn btn--success" target="_blank">🤖 MCP Server</a>
+            </div>
+            <div class="hero-stats stat-grid">
+                <div class="hero-stat-card">
+                    <strong>{{ total_weeks }}</strong>
+                    <span>Total ranking weeks captured</span>
+                </div>
+                <div class="hero-stat-card">
+                    <strong>{{ weeks_by_year.keys()|list|min }} – {{ weeks_by_year.keys()|list|max }}</strong>
+                    <span>Complete coverage span</span>
+                </div>
+                <div class="hero-stat-card">
+                    <strong>Instant</strong>
+                    <span>No auth or rate limits</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="surface-card" style="margin-top: 2.5rem;">
+            <div class="section-heading">
+                <h2>Browse weekly rankings</h2>
+                <p>Search for a Monday or expand a year to jump straight into any ranking snapshot.</p>
+            </div>
+            <div class="search-stack">
+                <label class="input-control" for="searchInput">
+                    <input type="text" id="searchInput" class="search-input" placeholder="Try 2010-01-04, 1995-06-12, etc." aria-label="Search weeks">
+                </label>
+                <div class="info-callout">
+                    <strong>Tip:</strong>
+                    <span>Start typing to filter both years and weeks instantly. Matching sections stay expanded so you can open them without extra clicks.</span>
+                </div>
+            </div>
+
+            <div id="weeksContainer" style="margin-top: 1.5rem;">
+                {% for year in weeks_by_year.keys()|sort(reverse=True) %}
+                <div class="year-panel" data-year="{{ year }}">
+                    <div class="year-panel__header" onclick="toggleYear('{{ year }}')">
+                        <span>{{ year }}</span>
+                        <span class="collapse-icon">▾</span>
+                    </div>
+                    <div class="year-panel__body">
+                        <div class="week-grid" id="weeks-{{ year }}">
+                            {% for week in weeks_by_year[year]|sort(reverse=True) %}
+                            <a href="/week/{{ week }}" class="week-chip" data-week="{{ week }}">
+                                {{ week }}
+                            </a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
     </div>
     
     <script>
         // Search functionality
         const searchInput = document.getElementById('searchInput');
-        const yearSections = document.querySelectorAll('.year-section');
-        
+        const yearPanels = document.querySelectorAll('.year-panel');
+
         searchInput.addEventListener('input', function(e) {
             const searchTerm = e.target.value.toLowerCase();
             
             if (searchTerm === '') {
                 // Show all sections
-                yearSections.forEach(section => {
-                    section.style.display = 'block';
-                    const weekLinks = section.querySelectorAll('.week-link');
-                    weekLinks.forEach(link => link.style.display = 'block');
+                yearPanels.forEach(panel => {
+                    panel.style.display = 'block';
+                    const weekLinks = panel.querySelectorAll('.week-chip');
+                    weekLinks.forEach(link => link.style.display = 'flex');
+                    const grid = panel.querySelector('.week-grid');
+                    grid.classList.add('is-hidden');
+                    panel.querySelector('.year-panel__header').classList.add('is-collapsed');
                 });
                 return;
             }
             
-            yearSections.forEach(section => {
-                const weekLinks = section.querySelectorAll('.week-link');
+            yearPanels.forEach(panel => {
+                const weekLinks = panel.querySelectorAll('.week-chip');
                 let hasVisibleWeeks = false;
                 
                 weekLinks.forEach(link => {
                     const weekDate = link.getAttribute('data-week');
                     if (weekDate.toLowerCase().includes(searchTerm)) {
-                        link.style.display = 'block';
+                        link.style.display = 'flex';
                         hasVisibleWeeks = true;
                     } else {
                         link.style.display = 'none';
@@ -261,32 +205,39 @@
                 });
                 
                 // Show/hide year section based on whether it has visible weeks
-                section.style.display = hasVisibleWeeks ? 'block' : 'none';
+                panel.style.display = hasVisibleWeeks ? 'block' : 'none';
                 
                 // Expand sections with results
                 if (hasVisibleWeeks) {
-                    const weeksGrid = section.querySelector('.weeks-grid');
-                    const yearHeader = section.querySelector('.year-header');
-                    weeksGrid.classList.remove('collapsed');
-                    yearHeader.classList.remove('collapsed');
+                    const weeksGrid = panel.querySelector('.week-grid');
+                    const yearHeader = panel.querySelector('.year-panel__header');
+                    weeksGrid.classList.remove('is-hidden');
+                    yearHeader.classList.remove('is-collapsed');
                 }
             });
         });
         
         // Toggle year sections
         function toggleYear(year) {
-            const weeksGrid = document.getElementById('weeks-' + year);
-            const yearHeader = document.querySelector(`[onclick="toggleYear('${year}')"]`);
-            weeksGrid.classList.toggle('collapsed');
-            yearHeader.classList.toggle('collapsed');
+            const panel = document.querySelector(`[data-year="${year}"]`);
+            const weeksGrid = panel.querySelector('.week-grid');
+            const yearHeader = panel.querySelector('.year-panel__header');
+            weeksGrid.classList.toggle('is-hidden');
+            yearHeader.classList.toggle('is-collapsed');
         }
         
         // Collapse all years by default except the most recent
         document.addEventListener('DOMContentLoaded', function() {
-            const yearHeaders = document.querySelectorAll('.year-header');
-            yearHeaders.forEach((header, index) => {
-                if (index > 0) { // Keep first (most recent) year expanded
-                    header.click();
+            const panels = document.querySelectorAll('.year-panel');
+            panels.forEach((panel, index) => {
+                const weeksGrid = panel.querySelector('.week-grid');
+                const yearHeader = panel.querySelector('.year-panel__header');
+                if (index === 0) {
+                    weeksGrid.classList.remove('is-hidden');
+                    yearHeader.classList.remove('is-collapsed');
+                } else {
+                    weeksGrid.classList.add('is-hidden');
+                    yearHeader.classList.add('is-collapsed');
                 }
             });
         });

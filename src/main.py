@@ -33,8 +33,9 @@ app.add_middleware(
 # Include MCP router
 app.include_router(mcp_router)
 
-# Setup templates
+# Setup templates & static assets
 templates = Jinja2Templates(directory="templates")
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # Database path (kept for compatibility)
 DB_PATH = "rankings.db"

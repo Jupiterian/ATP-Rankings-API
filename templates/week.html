@@ -4,245 +4,148 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ATP Rankings - {{ week_date }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='css/theme.css') }}">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-        
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            padding: 40px;
-        }
-        
-        .header {
+        .week-hero {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 1.5rem;
         }
-        
-        h1 {
-            color: #333;
-            margin-bottom: 10px;
-            font-size: 2.5em;
+
+        .week-hero h1 {
+            margin-bottom: 0.4rem;
         }
-        
-        .date {
-            color: #666;
-            font-size: 1.3em;
-            margin-bottom: 20px;
+
+        .week-hero p {
+            margin: 0;
+            color: var(--color-muted);
         }
-        
-        .navigation {
+
+        .nav-row {
             display: flex;
+            flex-wrap: wrap;
+            gap: 0.8rem;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 30px;
-            gap: 10px;
+            margin: 1.5rem 0;
         }
-        
-        .nav-btn {
-            padding: 10px 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            text-decoration: none;
-            border-radius: 8px;
-            font-weight: 500;
-            transition: all 0.3s;
-            display: inline-block;
+
+        .nav-row .spacer {
+            flex: 1;
         }
-        
-        .nav-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+
+        .nav-row .btn {
+            flex: 1;
+            min-width: 180px;
+            justify-content: center;
         }
-        
-        .nav-btn.disabled {
-            background: #ccc;
+
+        .btn.is-disabled {
+            color: var(--color-muted);
+            border-color: rgba(15, 23, 42, 0.08);
+            background: rgba(15, 23, 42, 0.04);
             cursor: not-allowed;
-            opacity: 0.6;
-        }
-        
-        .nav-btn.disabled:hover {
-            transform: none;
             box-shadow: none;
         }
-        
-        .home-btn {
-            background: #28a745;
+
+        .search-panel {
+            margin-bottom: 1.5rem;
         }
-        
-        .home-btn:hover {
-            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
-        }
-        
-        .search-box {
-            margin-bottom: 20px;
-        }
-        
-        .search-box input {
-            padding: 10px 15px;
-            width: 100%;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            font-size: 16px;
-        }
-        
-        .search-box input:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-        
-        .rankings-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        }
-        
-        .rankings-table thead {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-        
-        .rankings-table th {
-            padding: 15px;
-            text-align: left;
-            font-weight: 600;
-            font-size: 1.1em;
-        }
-        
-        .rankings-table tbody tr {
-            border-bottom: 1px solid #e9ecef;
-            transition: background-color 0.2s;
-        }
-        
-        .rankings-table tbody tr:hover {
-            background-color: #f8f9fa;
-        }
-        
-        .rankings-table td {
-            padding: 12px 15px;
-        }
-        
-        .rank-cell {
-            font-weight: bold;
-            color: #667eea;
-            font-size: 1.1em;
+
+        .rank-table .rank-col {
+            font-weight: 700;
+            color: var(--color-primary);
             width: 80px;
         }
-        
-        .name-cell {
-            color: #333;
-            font-size: 1.05em;
+
+        .rank-table .points-col {
+            color: var(--color-muted);
         }
-        
-        .points-cell {
-            color: #666;
-            font-style: italic;
+
+        .rank-row--top {
+            background: linear-gradient(90deg, rgba(37, 99, 235, 0.04), transparent);
         }
-        
-        .top3 {
-            background: linear-gradient(135deg, #fff7e6 0%, #ffe8cc 100%);
-        }
-        
-        .rank1 .rank-cell {
-            color: #ffd700;
-            font-size: 1.3em;
-        }
-        
-        .rank2 .rank-cell {
-            color: #c0c0c0;
-            font-size: 1.2em;
-        }
-        
-        .rank3 .rank-cell {
-            color: #cd7f32;
-            font-size: 1.15em;
-        }
-        
-        .stats {
-            text-align: center;
-            margin-top: 30px;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 10px;
-        }
-        
-        .no-results {
-            text-align: center;
-            padding: 40px;
-            color: #999;
-            font-size: 1.1em;
+
+        .rank-row--top:nth-child(1) .rank-col { color: #f5b000; }
+        .rank-row--top:nth-child(2) .rank-col { color: #a1a1aa; }
+        .rank-row--top:nth-child(3) .rank-col { color: #d97706; }
+
+        .hint-text {
+            font-size: 0.9rem;
+            color: var(--color-muted);
+            margin-top: 0.35rem;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>🎾 ATP Rankings</h1>
-            <div class="date">{{ week_date }}</div>
-        </div>
-        
-        <div class="navigation">
-            {% if prev_week %}
-                <a href="/week/{{ prev_week }}" class="nav-btn">← Previous Week ({{ prev_week }})</a>
-            {% else %}
-                <span class="nav-btn disabled">← Previous Week</span>
-            {% endif %}
-            
-            <a href="/" class="nav-btn home-btn">🏠 Home</a>
-            
-            {% if next_week %}
-                <a href="/week/{{ next_week }}" class="nav-btn">Next Week ({{ next_week }}) →</a>
-            {% else %}
-                <span class="nav-btn disabled">Next Week →</span>
-            {% endif %}
-        </div>
-        
-        <div class="search-box">
-            <input type="text" id="searchInput" placeholder="Search for a player...">
-        </div>
-        
-        <table class="rankings-table" id="rankingsTable">
-            <thead>
-                <tr>
-                    <th>Rank</th>
-                    <th>Player</th>
-                    <th>Points</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for player in rankings %}
-                <tr class="{% if player.rank == '1' %}rank1 top3{% elif player.rank == '2' %}rank2 top3{% elif player.rank == '3' %}rank3 top3{% endif %}" data-player="{{ player.name|lower }}">
-                    <td class="rank-cell">{{ player.rank }}</td>
-                    <td class="name-cell">{{ player.name }}</td>
-                    <td class="points-cell">{{ player.points }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        
-        <div class="stats">
-            <p>Total players ranked: <strong>{{ rankings|length }}</strong></p>
-        </div>
+    <div class="page-shell">
+        <section class="surface-card">
+            <div class="week-hero">
+                <div class="chip">Weekly snapshot</div>
+                <h1>🎾 ATP Rankings</h1>
+                <p>{{ week_date }}</p>
+            </div>
+
+            <div class="nav-row">
+                {% if prev_week %}
+                <a href="/week/{{ prev_week }}" class="btn btn--ghost">← {{ prev_week }}</a>
+                {% else %}
+                <span class="btn btn--ghost is-disabled">← First week</span>
+                {% endif %}
+
+                <a href="/" class="btn btn--primary">🏠 Back to archive</a>
+
+                {% if next_week %}
+                <a href="/week/{{ next_week }}" class="btn btn--ghost">{{ next_week }} →</a>
+                {% else %}
+                <span class="btn btn--ghost is-disabled">Latest week →</span>
+                {% endif %}
+            </div>
+
+            <div class="subtle-card search-panel">
+                <label class="input-control" for="searchInput">
+                    <input type="text" id="searchInput" placeholder="Quickly filter players...">
+                </label>
+                <p class="hint-text">Highlight the player you're after without leaving the keyboard.</p>
+            </div>
+
+            <div class="table-wrapper">
+                <table class="table rank-table" id="rankingsTable">
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Player</th>
+                            <th>Points</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for player in rankings %}
+                        <tr class="rank-row {% if player.rank|int <= 3 %}rank-row--top{% endif %}" data-player="{{ player.name|lower }}">
+                            <td class="rank-col">{{ player.rank }}</td>
+                            <td>{{ player.name }}</td>
+                            <td class="points-col">{{ player.points }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="stat-grid" style="margin-top: 1.5rem;">
+                <div class="stat-card">
+                    <div class="stat-card__value">{{ rankings|length }}</div>
+                    <div class="stat-card__label">Players ranked this week</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card__value">Use arrows</div>
+                    <div class="stat-card__label">Navigate weeks with ← and →</div>
+                </div>
+            </div>
+        </section>
     </div>
     
     <script>
         // Search functionality
         const searchInput = document.getElementById('searchInput');
-        const tableRows = document.querySelectorAll('#rankingsTable tbody tr');
+    const tableRows = document.querySelectorAll('#rankingsTable tbody tr');
         
         searchInput.addEventListener('input', function(e) {
             const searchTerm = e.target.value.toLowerCase();
