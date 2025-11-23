@@ -24,10 +24,21 @@ app = FastAPI(title="ATP Rankings Database")
 from starlette.requests import Request
 from starlette.responses import Response
 
+# Smart HEAD handler
 @app.api_route("/{path:path}", methods=["HEAD"])
-async def global_head_handler(request: Request, path: str):
-    return Response(status_code=200)
-    
+async def smart_head_handler(request: Request, path: str):
+    # Normalize path (no leading slash)
+    request_path = "/" + path
+
+    # Check if any GET route matches this path
+    for route in app.routes:
+        if "GET" in getattr(route, "methods", []):
+            if hasattr(route, "path") and route.path == request_path:
+                return Response(status_code=200)
+
+    # If no GET route exists for this path → behave normally
+    return Response(status_code=404)
+
 # Add CORS middleware for MCP client access
 app.add_middleware(
     CORSMiddleware,
