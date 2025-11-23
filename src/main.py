@@ -21,6 +21,13 @@ from .mcp_router import router as mcp_router
 
 app = FastAPI(title="ATP Rankings Database")
 
+from starlette.requests import Request
+from starlette.responses import Response
+
+@app.api_route("/{path:path}", methods=["HEAD"])
+async def global_head_handler(request: Request, path: str):
+    return Response(status_code=200)
+    
 # Add CORS middleware for MCP client access
 app.add_middleware(
     CORSMiddleware,
