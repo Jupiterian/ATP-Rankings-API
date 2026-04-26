@@ -2,6 +2,7 @@
 
 # ATP Rankings Data Visualization
 
+[![SafeSkill 93/100](https://img.shields.io/badge/SafeSkill-93%2F100_Verified%20Safe-brightgreen)](https://safeskill.dev/scan/jupiterian-atp-rankings-api)
 A comprehensive Python project for ATP tennis rankings data collection, analysis, and visualization. Features include web scraping, database management, interactive web interface, and AI integration via Model Context Protocol (MCP).
 
 ## 🌟 Features
