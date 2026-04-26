@@ -83,12 +83,13 @@ async def home(request: Request):
         weeks_by_year[year].append(week)
     
     return templates.TemplateResponse(
-        "index.html",
-        {
+        request=request,
+        name="index.html",
+        context={
             "request": request,
             "weeks_by_year": weeks_by_year,
             "total_weeks": len(weeks)
-        }
+        },
     )
 
 
@@ -96,8 +97,9 @@ async def home(request: Request):
 async def api_documentation(request: Request):
     """Render the API documentation page."""
     return templates.TemplateResponse(
-        "api_docs.html",
-        {"request": request}
+        request=request,
+        name="api_docs.html",
+        context={"request": request},
     )
 
 
@@ -114,14 +116,15 @@ async def week_page(request: Request, week_date: str):
         next_week = all_weeks[current_index - 1] if current_index - 1 >= 0 else None
         
         return templates.TemplateResponse(
-            "week.html",
-            {
+            request=request,
+            name="week.html",
+            context={
                 "request": request,
                 "week_date": week_date,
                 "rankings": rankings,
                 "prev_week": prev_week,
                 "next_week": next_week
-            }
+            },
         )
     except HTTPException:
         raise
@@ -150,13 +153,21 @@ async def api_week_data(week_date: str):
 @app.get("/compare", response_class=HTMLResponse)
 async def compare_page(request: Request):
     """Render the player comparison/stats page."""
-    return templates.TemplateResponse("comparison.html", {"request": request})
+    return templates.TemplateResponse(
+        request=request,
+        name="comparison.html",
+        context={"request": request},
+    )
 
 
 @app.get("/weeks-at-no1", response_class=HTMLResponse)
 async def weeks_at_no1_page(request: Request):
     """Render the weeks at number 1 histogram page."""
-    return templates.TemplateResponse("weeks_at_no1.html", {"request": request})
+    return templates.TemplateResponse(
+        request=request,
+        name="weeks_at_no1.html",
+        context={"request": request},
+    )
 
 
 @app.get("/api/players/search")
