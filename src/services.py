@@ -6,7 +6,8 @@ import sqlite3
 from typing import List, Dict, Any, Tuple
 from pathlib import Path
 
-DB_PATH = "rankings.db"
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+DB_PATH = str(PROJECT_ROOT / "rankings.db")
 
 
 def get_db_connection():

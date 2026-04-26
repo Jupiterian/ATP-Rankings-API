@@ -51,9 +51,12 @@ app.add_middleware(
 # Include MCP router
 app.include_router(mcp_router)
 
+# Resolve project root so template/static loading works regardless of current working directory
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+
 # Setup templates & static assets
-templates = Jinja2Templates(directory="templates")
-app.mount("/static", StaticFiles(directory="static"), name="static")
+templates = Jinja2Templates(directory=str(PROJECT_ROOT / "templates"))
+app.mount("/static", StaticFiles(directory=str(PROJECT_ROOT / "static")), name="static")
 
 # Database path (kept for compatibility)
 DB_PATH = "rankings.db"
