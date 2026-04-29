@@ -5,17 +5,17 @@
 [![SafeSkill 93/100](https://img.shields.io/badge/SafeSkill-93%2F100_Verified%20Safe-brightgreen)](https://safeskill.dev/scan/jupiterian-atp-rankings-api)
 A comprehensive Python project for ATP tennis rankings data collection, analysis, and visualization. Features include web scraping, database management, interactive web interface, and AI integration via Model Context Protocol (MCP).
 
-## 🌟 Features
+## Features
 
-- **📊 Data Collection**: Automated scraping from atptour.com
-- **🗄️ Database**: 2,600+ weeks of historical ATP rankings (1973-2025) 
-- **🌐 Web Interface**: Modern FastAPI application with interactive charts
-- **📈 CLI Analysis**: Command-line tools for player statistics and comparisons
-- **🤖 AI Integration**: MCP server for AI assistant access
-- **🎨 Visualizations**: Matplotlib (CLI) and Chart.js (web) graphs
-- **🧪 Testing**: Comprehensive test suite with pytest
+- ** Data Collection**: Automated scraping from atptour.com
+- ** Database**: 2,600+ weeks of historical ATP rankings (1973-2025) 
+- ** Web Interface**: Modern FastAPI application with interactive charts
+- ** CLI Analysis**: Command-line tools for player statistics and comparisons
+- ** AI Integration**: MCP server for AI assistant access
+- ** Visualizations**: Matplotlib (CLI) and Chart.js (web) graphs
+- ** Testing**: Comprehensive test suite with pytest
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Installation
 
@@ -44,7 +44,7 @@ To get the latest rankings data:
 python scripts/filler.py
 ```
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 ATP-Rankings-Data-Visualization/
@@ -84,7 +84,7 @@ ATP-Rankings-Data-Visualization/
 └── requirements.txt         # Python dependencies
 ```
 
-## 🌐 Web Application
+## Web Application
 
 ### Features
 
@@ -92,7 +92,7 @@ ATP-Rankings-Data-Visualization/
 - **Player Search**: Autocomplete search across all players
 - **Player Comparison**: Side-by-side statistics with career graphs
 - **Weeks at #1**: Interactive histogram of world #1 rankings
-- **API Access**: RESTful API with comprehensive documentation
+- **API and MCP Access**: RESTful API with comprehensive documentation
 - **Keyboard Navigation**: Arrow keys to navigate between weeks
 
 ### Running Locally
@@ -148,7 +148,7 @@ python scripts/test_render_mcp.py https://your-app.onrender.com
 
 **Full Documentation**: See [`docs/MCP_README.md`](docs/MCP_README.md)
 
-## 📊 CLI Analysis Tools
+## CLI Analysis Tools
 
 ### analyze.py
 
@@ -177,7 +177,7 @@ python scripts/analyze.py -n
 
 **Examples**: See [`Examples/Examples.md`](Examples/Examples.md)
 
-## 🗄️ Database Management
+## Database Management
 
 ### Update Database (Recommended)
 
@@ -204,7 +204,7 @@ python scripts/debug.py
 
 Recommended GUI tool: [DB Browser for SQLite](https://sqlitebrowser.org/)
 
-## 🚀 Deployment
+## Deployment
 
 ### Deploy to Render (Free)
 
@@ -232,7 +232,7 @@ Recommended GUI tool: [DB Browser for SQLite](https://sqlitebrowser.org/)
 
 **Full Guide**: See [`docs/MCP_DEPLOYMENT.md`](docs/MCP_DEPLOYMENT.md) for Railway, Fly.io, Heroku, Docker, and VPS options.
 
-## 🧪 Testing
+## Testing
 
 ```bash
 # Run all tests
@@ -245,7 +245,7 @@ pytest tests/ --cov=src --cov-report=html
 pytest tests/test_mcp.py::TestMCPHealth -v
 ```
 
-## 🛠️ Technologies
+## Technologies
 
 **Backend**:
 - Python 3.12
@@ -268,11 +268,11 @@ pytest tests/test_mcp.py::TestMCPHealth -v
 - Docker (containerization)
 - Render/Railway/Fly.io (hosting)
 
-## 📝 License
+## License
 
 See [LICENSE](LICENSE) file for details.
 
-## 🤝 Contributing
+## Contributing
 
 Contributions welcome! Please:
 1. Fork the repository
@@ -281,7 +281,7 @@ Contributions welcome! Please:
 4. Add tests
 5. Submit a pull request
 
-## 📧 Contact
+## Contact
 
 For questions or issues, please open a GitHub issue.
 
