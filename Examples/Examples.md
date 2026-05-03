@@ -92,7 +92,7 @@ python3 generate.py
 
 **Description:**  
 Completely rebuilds the SQLite database from historical ATP data.
-> ⚠️ Only use this if you need a fresh database or have deleted your existing one.
+>  Only use this if you need a fresh database or have deleted your existing one.
 
 ---
 

@@ -116,7 +116,7 @@ Access at `http://localhost:8000`
 - `POST /api/player-factfile` - Player statistics
 - `POST /api/player-career` - Career time-series data
 
-## 🤖 MCP Server (AI Integration)
+##  MCP Server (AI Integration)
 
 The MCP server allows AI assistants like Claude to query ATP rankings data.
 
@@ -287,4 +287,4 @@ For questions or issues, please open a GitHub issue.
 
 ---
 
-**⭐ If you find this project useful, please star the repository!**
+** If you find this project useful, please star the repository!**

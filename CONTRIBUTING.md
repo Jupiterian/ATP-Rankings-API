@@ -2,7 +2,7 @@
 
 Thank you for your interest in contributing! This document provides guidelines and instructions for contributing to this project.
 
-## 📋 Table of Contents
+##  Table of Contents
 
 - [Getting Started](#getting-started)
 - [Development Setup](#development-setup)
@@ -13,7 +13,7 @@ Thank you for your interest in contributing! This document provides guidelines a
 - [Code Style](#code-style)
 - [Reporting Issues](#reporting-issues)
 
-## 🚀 Getting Started
+##  Getting Started
 
 1. **Fork the repository** on GitHub
 2. **Clone your fork** locally:
@@ -26,7 +26,7 @@ Thank you for your interest in contributing! This document provides guidelines a
    git checkout -b feature/your-feature-name
    ```
 
-## 💻 Development Setup
+##  Development Setup
 
 1. **Install dependencies**:
    ```bash
@@ -43,7 +43,7 @@ Thank you for your interest in contributing! This document provides guidelines a
    pytest tests/ -v
    ```
 
-## 📁 Project Structure
+##  Project Structure
 
 ```
 src/                    # Core application code
@@ -61,7 +61,7 @@ tests/                 # Test suite
 docs/                  # Documentation
 ```
 
-## ✏️ Making Changes
+##  Making Changes
 
 ### Adding New Features
 
@@ -90,7 +90,7 @@ docs/                  # Documentation
 - Update `scripts/filler.py` for incremental updates
 - Test with `scripts/debug.py` to find issues
 
-## 🧪 Testing
+##  Testing
 
 ### Run All Tests
 ```bash
@@ -133,7 +133,7 @@ def test_new_feature():
     assert result == expected_output
 ```
 
-## 📤 Submitting Changes
+##  Submitting Changes
 
 1. **Commit your changes**:
    ```bash
@@ -163,7 +163,7 @@ def test_new_feature():
 - **Tests**: Include tests for new features
 - **Documentation**: Update README.md or docs/ if needed
 
-## 🎨 Code Style
+##  Code Style
 
 ### Python
 
@@ -208,7 +208,7 @@ async def get_stats(request: PlayerRequest):
 - Inline comments for complex logic
 - Keep comments up-to-date with code changes
 
-## 🐛 Reporting Issues
+##  Reporting Issues
 
 ### Bug Reports
 
@@ -231,7 +231,7 @@ Please include:
 3. **Proposed Solution**: How could this be implemented?
 4. **Alternatives**: Any alternative solutions considered?
 
-## 📝 Documentation
+##  Documentation
 
 When adding features, please update:
 
@@ -240,7 +240,7 @@ When adding features, please update:
 - **Code comments**: For implementation details
 - **CHANGELOG.md**: For all changes
 
-## ✅ Checklist Before Submitting
+##  Checklist Before Submitting
 
 - [ ] Code follows project style guidelines
 - [ ] Tests added and passing
@@ -249,7 +249,7 @@ When adding features, please update:
 - [ ] Branch is up-to-date with main
 - [ ] No merge conflicts
 
-## 🤝 Code Review Process
+##  Code Review Process
 
 1. Maintainers will review your PR
 2. They may request changes or ask questions
@@ -257,17 +257,17 @@ When adding features, please update:
 4. Once approved, your PR will be merged
 5. Your contribution will be credited in CHANGELOG.md
 
-## 💡 Tips
+##  Tips
 
 - Start small - fix bugs or improve documentation first
 - Ask questions - open an issue to discuss large changes
 - Be patient - reviews may take a few days
 - Be respectful - follow the code of conduct
 
-## 📧 Questions?
+##  Questions?
 
 Open an issue on GitHub with the "question" label.
 
 ---
 
-Thank you for contributing to ATP Rankings Data Visualization! 🎾
+Thank you for contributing to ATP Rankings Data Visualization! 

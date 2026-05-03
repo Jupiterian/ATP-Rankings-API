@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 ## [1.0.0] - 2025-11-02
 
-### 🎉 Major Reorganization
+###  Major Reorganization
 
 #### Added
 - **Organized Directory Structure**: Split files into logical directories
@@ -49,7 +49,7 @@ All notable changes to this project will be documented in this file.
   - Deployment instructions
   - Testing instructions
 
-### 📁 New Directory Structure
+###  New Directory Structure
 
 ```
 ATP-Rankings-Data-Visualization/
@@ -61,7 +61,7 @@ ATP-Rankings-Data-Visualization/
 └── Examples/             # Visualizations
 ```
 
-### 🔧 Migration Notes
+###  Migration Notes
 
 If you have existing deployments or scripts:
 
@@ -93,7 +93,7 @@ If you have existing deployments or scripts:
    - `Dockerfile` already updated
    - Rebuild image: `docker build -t atp-rankings .`
 
-### ✅ Testing
+###  Testing
 
 All tests pass with new structure:
 ```bash
