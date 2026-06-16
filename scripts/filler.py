@@ -1,7 +1,7 @@
 #Quick Code to grab new data from ATP Website
 #Import Modules from collect.py
 from generate import collectData, extract_weeks
-import requests
+from curl_cffi import requests
 import sqlite3
 from bs4 import BeautifulSoup as bs
 import time
@@ -13,13 +13,23 @@ project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 db_path = os.path.join(project_root, 'rankings.db')
 
 #Request Dates
-singles = requests.Session()
-weeks = singles.get(url="https://www.atptour.com/en/rankings/singles", timeout=5)
+singles = requests.Session(impersonate="chrome")
+weeks = singles.get(url="https://www.atptour.com/en/rankings/singles", timeout=15)
+
+if weeks.status_code != 200:
+    print(f"Error: Failed to fetch ATP dates. Status code: {weeks.status_code}")
+    exit(1)
+
 soup = bs(weeks.content, "html.parser")
 conn = sqlite3.connect(db_path)
 cursor = conn.cursor()
 #Extract Rankings for dates
 dates = extract_weeks(soup)
+
+if not dates or dates == ["N/A"]:
+    print("Error: Could not retrieve dates from ATP website. It might be blocking the request or the page structure changed.")
+    exit(1)
+
 #Generate all Mondays since inception of rankings
 
 # Start date
@@ -39,6 +49,9 @@ while current <= today:
     current += timedelta(weeks=1)
 
 #Iterate through dates and check if they exist already in the database - if not add filler tables
+valid_dates = [d for d in dates if d.count("-") == 2]
+max_atp_date = max(valid_dates) if valid_dates else "0000-00-00"
+
 for i in range(1, len(mondays)):
     x = mondays[i]
     y = mondays[i - 1]
@@ -53,6 +66,9 @@ for i in range(1, len(mondays)):
             print(f"Collected data for {x}")
             time.sleep(1)
         else:
+            if x > max_atp_date:
+                print(f"Skipping {x} because it is newer than the latest available ATP ranking ({max_atp_date})")
+                continue
             cursor.execute(f"CREATE TABLE `{x}` AS SELECT * FROM `{y}`")
             conn.commit()
             print(f"New filler week for {x}")

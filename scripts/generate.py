@@ -1,4 +1,4 @@
-import requests
+from curl_cffi import requests
 from bs4 import BeautifulSoup as bs
 import sqlite3
 import time
@@ -16,13 +16,11 @@ def extract_text(soup, element_class):
     return texts if texts else ["N/A"]
 
 def collectData (week, connection):
-    #Use headers to make connection more legit
-    headers = {"User-Agent": "Mozilla/5.0"}
-    sigma = requests.Session()
+    #Use curl_cffi with impersonate to make connection more legit
+    sigma = requests.Session(impersonate="chrome")
     Rankings = sigma.get(
         url=f"https://www.atptour.com/en/rankings/singles?dateWeek={week}&rankRange=0-100",
-        headers=headers,
-        timeout=5
+        timeout=15
     )
     ##PARSE DATA
     soup = bs(Rankings.content, "html.parser")
