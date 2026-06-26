@@ -66,7 +66,8 @@ ATP-Rankings-Data-Visualization/
 │   ├── MCP_README.md        # MCP server documentation
 │   ├── MCP_DEPLOYMENT.md    # Deployment guide
 │   ├── MCP_IMPLEMENTATION_SUMMARY.md
-│   └── MCP_QUICK_REFERENCE.md
+│   ├── MCP_QUICK_REFERENCE.md
+│   └── WEBSITE_USER_GUIDE.md
 ├── templates/                # HTML templates (Jinja2)
 │   ├── index.html           # Home page
 │   ├── week.html            # Weekly rankings
@@ -83,6 +84,10 @@ ATP-Rankings-Data-Visualization/
 ├── runtime.txt              # Python version
 └── requirements.txt         # Python dependencies
 ```
+
+## Website User Guide
+
+An end-user website guide is available at [`docs/WEBSITE_USER_GUIDE.md`](docs/WEBSITE_USER_GUIDE.md). It covers key website features, common workflows, REST/MCP operations, and local operating instructions.
 
 ## Web Application
 
