@@ -1,0 +1,43 @@
+name: Update ATP Rankings DB
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "5 0 * * 1"
+
+permissions:
+  contents: write
+
+jobs:
+  update-db:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Refresh rankings database
+        run: python3 scripts/filler.py
+
+      - name: Commit updated database
+        run: |
+          if git diff --quiet -- rankings.db; then
+            echo "No database changes"
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add rankings.db
+          git commit -m "Update ATP rankings database"
+          git push
