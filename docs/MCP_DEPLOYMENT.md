@@ -50,7 +50,7 @@ docker-compose up -d
    - Connect your GitHub repository
    - Select: `Web Service`
    - Build Command: `pip install -r requirements.txt`
-   - Start Command: `uvicorn main:app --host 0.0.0.0 --port $PORT`
+   - Start Command: `uvicorn src.main:app --host 0.0.0.0 --port $PORT`
 
 2. **Environment Variables** (if needed)
    - None required by default
@@ -58,6 +58,7 @@ docker-compose up -d
 3. **Database**
    - Include `rankings.db` in your repository
    - OR use Render's disk storage for large DBs
+   - Do not run `scripts/filler.py` in the startup command on Render; ATP can return 403s from Render IPs, so refresh the database manually instead.
 
 4. **Access**
    - REST API: `https://your-app.onrender.com/api/*`
