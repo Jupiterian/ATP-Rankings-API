@@ -3,7 +3,7 @@ name: Update ATP Rankings DB
 on:
   workflow_dispatch:
   schedule:
-    - cron: "5 0 * * 1"
+  - cron: "5 16 * * 1"
 
 permissions:
   contents: write
