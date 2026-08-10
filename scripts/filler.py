@@ -1,7 +1,6 @@
 #Quick Code to grab new data from ATP Website
 #Import Modules from collect.py
-from generate import collectData, extract_weeks
-from curl_cffi import requests
+from generate import collectData, extract_weeks, fetch_atp_page
 import sqlite3
 from bs4 import BeautifulSoup as bs
 import time
@@ -13,11 +12,10 @@ project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 db_path = os.path.join(project_root, 'rankings.db')
 
 #Request Dates
-singles = requests.Session(impersonate="chrome")
-weeks = singles.get(url="https://www.atptour.com/en/rankings/singles", timeout=15)
-
-if weeks.status_code != 200:
-    print(f"Error: Failed to fetch ATP dates. Status code: {weeks.status_code}")
+try:
+    weeks = fetch_atp_page(url="https://www.atptour.com/en/rankings/singles", timeout=15)
+except RuntimeError as exc:
+    print(f"Error: Failed to fetch ATP dates. {exc}")
     exit(1)
 
 soup = bs(weeks.content, "html.parser")
@@ -62,9 +60,12 @@ for i in range(1, len(mondays)):
         continue
     else:
         if x in dates:
-            collectData(x, conn)
-            print(f"Collected data for {x}")
-            time.sleep(1)
+            if collectData(x, conn):
+                print(f"Collected data for {x}")
+                time.sleep(1)
+            else:
+                print(f"Error: Failed to collect ATP rankings for {x}")
+                exit(1)
         else:
             if x > max_atp_date:
                 print(f"Skipping {x} because it is newer than the latest available ATP ranking ({max_atp_date})")
