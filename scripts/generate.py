@@ -3,24 +3,28 @@ from bs4 import BeautifulSoup as bs
 import sqlite3
 import time
 import os
+import cloudscraper
 
 # Get the project root directory (parent of scripts/)
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 db_path = os.path.join(project_root, 'rankings.db')
 
 conn = sqlite3.connect(db_path)
+ATP_SESSION = requests.Session(impersonate="chrome124")
+ATP_SCRAPER = cloudscraper.create_scraper(
+    browser={"browser": "chrome", "platform": "windows", "mobile": False}
+)
 
 
 def fetch_atp_page(url, timeout=15, attempts=3):
     """Fetch an ATP page with a few browser fingerprints and a scraper fallback."""
-    impersonations = ("chrome124", "chrome", "safari")
+    impersonations = ("chrome124",)
     last_error = None
 
     for attempt in range(1, attempts + 1):
         for impersonation in impersonations:
             try:
-                session = requests.Session(impersonate=impersonation)
-                response = session.get(url=url, timeout=timeout)
+                response = ATP_SESSION.get(url=url, timeout=timeout)
                 if response.status_code == 200:
                     return response
                 last_error = RuntimeError(
@@ -30,12 +34,7 @@ def fetch_atp_page(url, timeout=15, attempts=3):
                 last_error = exc
 
         try:
-            import cloudscraper
-
-            scraper = cloudscraper.create_scraper(
-                browser={"browser": "chrome", "platform": "windows", "mobile": False}
-            )
-            response = scraper.get(
+            response = ATP_SCRAPER.get(
                 url,
                 timeout=timeout,
                 headers={
