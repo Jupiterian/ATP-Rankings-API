@@ -16,6 +16,10 @@ db_path = os.path.join(project_root, 'rankings.db')
 singles = requests.Session(impersonate="chrome")
 weeks = singles.get(url="https://www.atptour.com/en/rankings/singles", timeout=15)
 
+if weeks.status_code == 403:
+    print("Warning: ATP rankings page returned 403. Skipping database refresh for this run.")
+    exit(0)
+
 if weeks.status_code != 200:
     print(f"Error: Failed to fetch ATP dates. Status code: {weeks.status_code}")
     exit(1)
