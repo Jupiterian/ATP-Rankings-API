@@ -18,8 +18,9 @@ from .services import (
     get_weeks_at_no1 as service_get_weeks_at_no1
 )
 from .mcp_router import router as mcp_router
+from .mcp_server import mcp as mcp_server
 
-app = FastAPI(title="ATP Rankings Database")
+app = FastAPI(title="ATP Rankings Database", lifespan=lambda app: mcp_server.session_manager.run())
 
 from starlette.requests import Request
 from starlette.responses import Response
@@ -39,16 +40,19 @@ async def smart_head_handler(request: Request, path: str):
     # If no GET route exists for this path → behave normally
     return Response(status_code=404)
 
-# Add CORS middleware for MCP client access
+# Add CORS middleware for MCP client access (Claude.ai's custom connector
+# flow calls the /mcp endpoint directly from the browser and needs to be
+# able to read the Mcp-Session-Id response header)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # Configure appropriately for production
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["Mcp-Session-Id"],
 )
 
-# Include MCP router
+# Include legacy REST-style "MCP" router (kept for backwards compatibility)
 app.include_router(mcp_router)
 
 # Resolve project root so template/static loading works regardless of current working directory
@@ -213,6 +217,14 @@ async def api_weeks_at_no1():
         return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+# Mount the real MCP server (JSON-RPC 2.0 over Streamable HTTP transport)
+# at a single endpoint: /mcp. Mounted at "/" (not "/mcp") because FastMCP's
+# default streamable_http_path is already "/mcp" internally — this avoids
+# trailing-slash ambiguity from nesting one Starlette Mount prefix inside
+# another. Registered last so it never shadows the routes defined above.
+app.mount("/", mcp_server.streamable_http_app())
 
 
 if __name__ == "__main__":

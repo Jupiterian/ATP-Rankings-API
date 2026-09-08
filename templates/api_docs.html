@@ -684,26 +684,38 @@ curl "{{ request.url.scheme }}://{{ request.url.netloc }}/api/player/career?play
         <!-- Support Section -->
         <div class="section">
             <h2> MCP Server (AI Integration)</h2>
-            
+
             <p class="description">
-                This API also includes a <strong>Model Context Protocol (MCP)</strong> server for integration with AI assistants.
-                The MCP server provides the same data access through MCP-compliant endpoints.
+                This API also includes a real <strong>Model Context Protocol (MCP)</strong> server, implemented with the
+                official MCP Python SDK, speaking JSON-RPC 2.0 over the Streamable HTTP transport. It exposes the same
+                underlying data through proper MCP tools, and can be added directly as a custom connector in Claude.ai
+                or any other MCP-compatible client.
             </p>
-            
-            <h3>MCP Endpoints</h3>
+
+            <h3>MCP Endpoint</h3>
             <ul class="example-list">
-                <li><strong>Health Check:</strong> <code>GET /mcp/health</code></li>
-                <li><strong>Manifest:</strong> <code>GET /mcp/manifest</code></li>
-                <li><strong>Search Players:</strong> <code>POST /mcp/tools/search_players</code></li>
-                <li><strong>Player Factfile:</strong> <code>POST /mcp/tools/get_player_factfile</code></li>
-                <li><strong>Player Career:</strong> <code>POST /mcp/tools/get_player_career</code></li>
-                <li><strong>Weeks at #1:</strong> <code>GET /mcp/tools/get_weeks_at_no1</code></li>
-                <li><strong>All Weeks:</strong> <code>GET /mcp/tools/get_all_weeks</code></li>
-                <li><strong>Week Rankings:</strong> <code>POST /mcp/tools/get_week_rankings</code></li>
+                <li><strong>Single endpoint:</strong> <code>POST /mcp</code> (Streamable HTTP transport &mdash; <code>initialize</code>, <code>tools/list</code>, <code>tools/call</code>)</li>
             </ul>
-            
+
+            <h3>Available Tools</h3>
+            <ul class="example-list">
+                <li><strong>search_players</strong>(query, limit)</li>
+                <li><strong>get_player_factfile</strong>(player)</li>
+                <li><strong>get_player_career</strong>(player)</li>
+                <li><strong>get_weeks_at_no1</strong>()</li>
+                <li><strong>get_all_weeks</strong>()</li>
+                <li><strong>get_week_rankings</strong>(week_date)</li>
+            </ul>
+
             <p class="description">
-                For complete MCP documentation, see the 
+                A legacy set of REST-style endpoints under <code>/mcp/*</code> (e.g. <code>GET /mcp/health</code>,
+                <code>POST /mcp/tools/search_players</code>) remains available for backwards compatibility, but is not
+                a real MCP server and will not work with Claude.ai's custom connector flow &mdash; use the
+                <code>/mcp</code> endpoint above instead.
+            </p>
+
+            <p class="description">
+                For complete MCP documentation, see the
                 <a href="https://github.com/Jupiterian/ATP-Rankings-Data-Visualization/blob/main/MCP_README.md" target="_blank" style="color: #667eea;">
                     MCP_README.md
                 </a> file.

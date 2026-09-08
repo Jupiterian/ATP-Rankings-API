@@ -1,10 +1,12 @@
 # ATP Rankings MCP Server
 
-Model Context Protocol (MCP) server for ATP Tennis Rankings historical data. Provides programmatic access to player statistics, career data, and rankings history from 1973 to present.
+A real Model Context Protocol (MCP) server for ATP Tennis Rankings historical data. Provides programmatic access to player statistics, career data, and rankings history from 1973 to present.
 
 ## What is MCP?
 
-The Model Context Protocol (MCP) is a standardized protocol for exposing tools and resources to AI language models. This MCP server allows AI assistants to query ATP tennis rankings data directly.
+The [Model Context Protocol](https://modelcontextprotocol.io) is a standardized JSON-RPC 2.0 protocol for exposing tools and resources to AI language models. This server implements the protocol properly using the official [MCP Python SDK](https://github.com/modelcontextprotocol/python-sdk), speaking `initialize` / `tools/list` / `tools/call` over the **Streamable HTTP** transport at a single endpoint — so it can be added directly as a custom connector in Claude.ai or any other MCP-compatible client.
+
+> **Note:** This project also still exposes a legacy set of REST-style endpoints under `/mcp/*` (e.g. `/mcp/health`, `/mcp/tools/search_players`) for backwards compatibility. Those are plain REST endpoints named after MCP concepts — they are **not** a real MCP server and will not work with Claude.ai's custom connector flow. Use the single `/mcp` endpoint described below instead.
 
 ## Quick Start
 
@@ -13,300 +15,158 @@ The Model Context Protocol (MCP) is a standardized protocol for exposing tools a
 The MCP server is integrated into the main FastAPI application:
 
 ```bash
-python main.py
+uvicorn src.main:app --host 0.0.0.0 --port 8000
 ```
 
-The server runs on `http://localhost:8000` with MCP endpoints under `/mcp/*`
+The full app runs on `http://localhost:8000`:
+- REST API: `http://localhost:8000/api/*`
+- **MCP server (Streamable HTTP): `http://localhost:8000/mcp`**
+- Legacy REST-style "MCP" endpoints (deprecated): `http://localhost:8000/mcp/*`
 
-### Health Check
+### Testing the Handshake
 
-```bash
-curl http://localhost:8000/mcp/health
-```
-
-### Get Manifest
-
-```bash
-curl http://localhost:8000/mcp/manifest
-```
+See [Testing](#testing) below for a script that verifies `initialize` / `tools/list` / `tools/call` all work before you deploy.
 
 ## Available Tools
 
 ### 1. search_players
-Search for tennis players by name.
+Search for tennis players by (partial) name.
 
-**POST** `/mcp/tools/search_players`
-```json
-{
-  "query": "federer",
-  "limit": 10
-}
-```
-
-**GET** `/mcp/tools/search_players?q=federer&limit=10`
-
-**Response:**
-```json
-{
-  "ok": true,
-  "result": {
-    "players": ["Roger Federer", ...]
-  }
-}
-```
+- **query** (string, required): search text to match against player names
+- **limit** (integer, default `10`): maximum number of results
 
 ### 2. get_player_factfile
-Get comprehensive career statistics for a player.
+Get a player's career fact file: career-high rank, peak points, and weeks spent in the top 100 / top 10 / at No. 1.
 
-**POST** `/mcp/tools/get_player_factfile`
-```json
-{
-  "player": "Roger Federer"
-}
-```
-
-**Response:**
-```json
-{
-  "ok": true,
-  "result": {
-    "player": "Roger Federer",
-    "career_high_rank": 1,
-    "career_high_date": "2004-02-02",
-    "max_points": "15,903",
-    "max_points_date": "2012-11-05",
-    "weeks_top_100": 1234,
-    "weeks_top_10": 890,
-    "weeks_at_1": 310
-  }
-}
-```
+- **player** (string, required): exact player name as it appears in the rankings data
 
 ### 3. get_player_career
-Get time-series data of player's ranking and points history.
+Get a player's full time-series career history (rankings and points at every recorded week).
 
-**POST** `/mcp/tools/get_player_career`
-```json
-{
-  "player": "Rafael Nadal"
-}
-```
-
-**Response:**
-```json
-{
-  "ok": true,
-  "result": {
-    "player": "Rafael Nadal",
-    "ranking_dates": ["2005-08-08", "2005-08-15", ...],
-    "rankings": [49, 45, 43, ...],
-    "points_dates": ["2005-08-08", "2005-08-15", ...],
-    "points": [823, 845, 890, ...]
-  }
-}
-```
+- **player** (string, required): exact player name as it appears in the rankings data
 
 ### 4. get_weeks_at_no1
-Get all players who held #1 ranking and their weeks at #1.
-
-**GET** `/mcp/tools/get_weeks_at_no1?min_weeks=1&top_n=50`
-
-**Response:**
-```json
-{
-  "ok": true,
-  "result": [
-    {"player": "Novak Djokovic", "weeks": 428},
-    {"player": "Roger Federer", "weeks": 310},
-    ...
-  ]
-}
-```
+Get every player who has held the World No. 1 ranking, with total weeks held, sorted descending. No arguments.
 
 ### 5. get_all_weeks
-Get list of all available weeks in the database.
-
-**GET** `/mcp/tools/get_all_weeks`
-
-**Response:**
-```json
-{
-  "ok": true,
-  "result": {
-    "weeks": ["2025-04-21", "2025-04-14", ...],
-    "total": 2650
-  }
-}
-```
+Get the list of all rankings weeks available in the database. No arguments.
 
 ### 6. get_week_rankings
-Get complete ATP rankings for a specific week.
+Get the complete ATP rankings for a specific week.
 
-**POST** `/mcp/tools/get_week_rankings`
-```json
-{
-  "week": "2023-01-02"
-}
-```
+- **week_date** (string, required): week date in `YYYY-MM-DD` format, e.g. `"2023-01-02"`
 
-**Response:**
-```json
-{
-  "ok": true,
-  "result": {
-    "week": "2023-01-02",
-    "rankings": [
-      {"rank": "1", "name": "Carlos Alcaraz", "points": "6,820"},
-      {"rank": "2", "name": "Rafael Nadal", "points": "6,020"},
-      ...
-    ]
-  }
-}
-```
+All tools wrap the same service layer (`src/services.py`) used by the REST API, so results are always consistent between `/api/*` and `/mcp`.
 
 ## Error Handling
 
-All tools return a standard response format:
-
-**Success:**
-```json
-{
-  "ok": true,
-  "result": { ... }
-}
-```
-
-**Error:**
-```json
-{
-  "ok": false,
-  "error": "Error message"
-}
-```
-
-HTTP Status codes:
-- `200` - Success
-- `404` - Resource not found (player or week)
-- `500` - Internal server error
+Per the MCP spec, tool errors (e.g. player or week not found) are returned as a normal JSON-RPC result with `isError: true` and a human-readable message in `content`, rather than an HTTP error status — this is what lets an MCP client (like Claude) see and react to the error within the conversation.
 
 ## Testing
 
-Run the test suite:
+A test script is included at `scripts/test_mcp_handshake.py`. It exercises `initialize`, `tools/list`, and a couple of `tools/call` requests against a running server.
 
 ```bash
-# Install test dependencies
-pip install pytest httpx
+# Against a local server
+python scripts/test_mcp_handshake.py http://localhost:8000
 
-# Run tests
-pytest tests/test_mcp.py -v
-
-# Run specific test class
-pytest tests/test_mcp.py::TestMCPSearchPlayers -v
+# Against your deployed server
+python scripts/test_mcp_handshake.py https://your-app.onrender.com
 ```
+
+Or with raw `curl`:
+
+```bash
+# 1. Initialize
+curl -i -X POST http://localhost:8000/mcp \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json, text/event-stream" \
+  -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"curl-test","version":"0.1"}}}'
+
+# 2. List tools
+curl -s -X POST http://localhost:8000/mcp \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json, text/event-stream" \
+  -d '{"jsonrpc":"2.0","id":2,"method":"tools/list","params":{}}'
+
+# 3. Call a tool
+curl -s -X POST http://localhost:8000/mcp \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json, text/event-stream" \
+  -d '{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"search_players","arguments":{"query":"djokovic","limit":5}}}'
+```
+
+The server runs in `stateless_http` mode, so no session ID needs to be tracked between requests — each call above works independently.
+
+The legacy REST-style tests still live in `tests/test_mcp.py` and exercise the `/mcp/tools/*` endpoints; they are unaffected by this server.
 
 ## Integration with AI Assistants
 
+### Claude.ai (custom connector)
+
+In Claude.ai, go to **Settings → Connectors → Add custom connector** and enter your deployed server's `/mcp` URL, e.g.:
+
+```
+https://your-app.onrender.com/mcp
+```
+
+No authentication is required.
+
 ### Claude Desktop
 
-Add to your `claude_desktop_config.json`:
-
-```json
-{
-  "mcpServers": {
-    "atp-rankings": {
-      "command": "python",
-      "args": ["/path/to/main.py"],
-      "env": {
-        "PORT": "8000"
-      }
-    }
-  }
-}
-```
+Claude Desktop's config connects to a *local* MCP server process rather than a remote HTTP URL, so instead point it at a local `mcp-remote`/HTTP-capable launcher, or run the FastAPI app locally and use `http://localhost:8000/mcp` with an MCP client that supports Streamable HTTP.
 
 ### Custom Integration
 
-Use the manifest to discover available tools:
-
-```python
-import requests
-
-# Get manifest
-manifest = requests.get("http://localhost:8000/mcp/manifest").json()
-
-# List available tools
-for tool in manifest["capabilities"]["tools"]:
-    print(f"{tool['name']}: {tool['description']}")
-```
+Any MCP client that supports the Streamable HTTP transport can connect directly to `/mcp` and use the standard `initialize` → `tools/list` → `tools/call` flow — no separate manifest endpoint is needed (tool discovery happens via `tools/list`).
 
 ## Architecture
 
-The MCP server is built on top of the existing ATP Rankings API:
-
 ```
-┌─────────────────────┐
-│    FastAPI App      │
-│    (main.py)        │
-├─────────────────────┤
-│  MCP Router         │  ← /mcp/* endpoints
-│  (mcp_router.py)    │
-├─────────────────────┤
-│  Service Layer      │  ← Business logic
-│  (services.py)      │
-├─────────────────────┤
-│  SQLite Database    │  ← 2,600+ weeks of data
-│  (rankings.db)      │
-└─────────────────────┘
+┌──────────────────────────────┐
+│         FastAPI App          │
+│         (main.py)            │
+├───────────────┬───────────────┤
+│  REST API     │   MCP Server   │  ← /mcp (Streamable HTTP, JSON-RPC 2.0)
+│  (/api/*)     │  (mcp_server.py)│
+├───────────────┴───────────────┤
+│         Service Layer         │  ← Business logic (services.py)
+├────────────────────────────────┤
+│         SQLite Database        │  ← 2,600+ weeks of data
+│         (rankings.db)          │
+└────────────────────────────────┘
 ```
 
 **Benefits:**
 - Single process deployment
-- Shared database connections
-- Consistent error handling
-- Easy to test and maintain
+- Shared database connections and service layer with the REST API
+- Standards-compliant MCP transport, usable by Claude.ai and any other MCP client
+- Existing REST API (`/api/*`) is untouched
 
 ## Deployment
 
 ### Local Development
 ```bash
-python main.py
-# Server runs on http://localhost:8000
-# MCP endpoints at http://localhost:8000/mcp/*
+uvicorn src.main:app --host 0.0.0.0 --port 8000
+# REST API at http://localhost:8000/api/*
+# MCP server at http://localhost:8000/mcp
 ```
 
 ### Production (Render/Railway/Heroku)
 
-The MCP server is included in the main application. Use the existing `Procfile`:
+No changes needed to the existing `Procfile`:
 
 ```
-web: uvicorn main:app --host 0.0.0.0 --port $PORT
+web: uvicorn src.main:app --host 0.0.0.0 --port $PORT
 ```
 
-### Docker
-
-```dockerfile
-FROM python:3.12-slim
-
-WORKDIR /app
-COPY requirements.txt .
-RUN pip install -r requirements.txt
-
-COPY . .
-
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
-```
-
-Build and run:
-```bash
-docker build -t atp-rankings-mcp .
-docker run -p 8000:8000 -v $(pwd)/rankings.db:/app/rankings.db atp-rankings-mcp
-```
+The MCP server is mounted on the same FastAPI app and deploys with it automatically.
 
 ## API Documentation
 
 - **REST API Docs**: http://localhost:8000/api-docs
-- **MCP Manifest**: http://localhost:8000/mcp/manifest
-- **Health Check**: http://localhost:8000/mcp/health
+- **MCP Endpoint**: http://localhost:8000/mcp
+- **Legacy MCP-style Health Check** (deprecated): http://localhost:8000/mcp/health
 
 ## License
 
