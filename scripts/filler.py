@@ -11,6 +11,20 @@ import os
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 db_path = os.path.join(project_root, 'rankings.db')
 
+# An explicitly configured source bypasses ATP, including its date-list page.
+api_key = os.environ.get("LIVETENNIS_API_KEY", "").strip()
+if api_key:
+    from livetennis import update_latest_rankings
+
+    try:
+        with sqlite3.connect(db_path) as connection:
+            week, inserted = update_latest_rankings(connection, api_key)
+    except (ValueError, sqlite3.Error) as exc:
+        print(f"Error: {exc}")
+        raise SystemExit(1) from None
+    print(f"Collected rankings for {week}" if inserted else f"Rankings for {week} already exist")
+    raise SystemExit(0)
+
 #Request Dates
 try:
     weeks = fetch_atp_page(url="https://www.atptour.com/en/rankings/singles", timeout=15)

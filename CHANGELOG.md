@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+### Added
+- Optional Live Tennis API source for the weekly ATP top 100 update, selected
+  with `LIVETENNIS_API_KEY` (PRO plan required). Validates publication dates and
+  complete snapshots, preserves existing weeks, and inserts each new week atomically.
+- Offline regression tests for the source and weekly updater selection.
+
 ## [1.0.0] - 2025-11-02
 
 ###  Major Reorganization

@@ -44,6 +44,30 @@ To get the latest rankings data:
 python scripts/filler.py
 ```
 
+#### Optional Live Tennis API source
+
+If ATP blocks the scraper, `scripts/filler.py` can import the latest published
+ATP singles top 100 from [Live Tennis API](https://docs.livetennisapi.com/).
+Rankings require a **PRO plan**; a free key cannot use this source.
+
+Set `LIVETENNIS_API_KEY` in the process environment, then run the same command:
+
+```bash
+python scripts/filler.py
+```
+
+For the weekly GitHub workflow, add a repository secret named
+`LIVETENNIS_API_KEY`. An absent or empty key keeps the ATP scraper as the default.
+The key is sent only in the `X-API-Key` header.
+
+This mode makes one request for the latest published top 100 and uses the
+response's publication date as the table name. It preserves existing weeks and
+rejects incomplete or malformed snapshots before writing. Authentication, plan,
+and network errors stop the update with a nonzero exit status. It does not
+backfill historical gaps, synthesize filler weeks, or run the historical rebuild;
+use the default ATP path for those operations. Tests use offline responses, so
+no API key is needed to run them.
+
 ## Project Structure
 
 ```

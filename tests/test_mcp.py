@@ -4,6 +4,7 @@ Run with: pytest tests/test_mcp.py -v
 """
 import pytest
 from fastapi.testclient import TestClient
+import sqlite3
 import sys
 from pathlib import Path
 
@@ -40,8 +41,20 @@ class TestMCPHealth:
 class TestMCPSearchPlayers:
     """Test player search MCP tool."""
     
-    def test_search_players_post_success(self):
+    def test_search_players_post_success(self, tmp_path, monkeypatch):
         """Test searching for players via POST."""
+        from src import services
+
+        # Search only scans the newest 100 weeks. Keep this test independent
+        # of retired players disappearing from the rolling production data.
+        database = tmp_path / "rankings.db"
+        with sqlite3.connect(database) as connection:
+            connection.execute('CREATE TABLE "2026-08-31" (rank, name, points)')
+            connection.execute(
+                'INSERT INTO "2026-08-31" VALUES (?, ?, ?)',
+                ("1", "Roger Federer", "10,000"),
+            )
+        monkeypatch.setattr(services, "DB_PATH", str(database))
         response = client.post(
             "/mcp/tools/search_players",
             json={"query": "federer", "limit": 5}
@@ -51,7 +64,7 @@ class TestMCPSearchPlayers:
         assert data["ok"] is True
         assert "result" in data
         assert "players" in data["result"]
-        assert len(data["result"]["players"]) > 0
+        assert data["result"]["players"] == ["Roger Federer"]
     
     def test_search_players_get_success(self):
         """Test searching for players via GET."""
