@@ -1,0 +1,69 @@
+{% from "_icons.html" import icon, brand_mark %}
+{%- set active_page = active_page|default("") -%}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}ATP Rankings Database{% endblock %}</title>
+    <meta name="description" content="{% block description %}Search 2,600+ Mondays of tennis history, compare players, and plug the data into your own tools or AI agents.{% endblock %}">
+    <script>
+        /* Apply the theme before first paint: saved choice, else the OS preference. */
+        (function () {
+            var root = document.documentElement, theme = null;
+            root.classList.add('js');
+            try { theme = localStorage.getItem('theme'); } catch (e) {}
+            if (theme !== 'light' && theme !== 'dark') {
+                theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+            }
+            root.setAttribute('data-theme', theme);
+        })();
+    </script>
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', path='img/favicon.svg') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&family=JetBrains+Mono:wght@400;500;600&display=swap">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/theme.css') }}">
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <header class="site-header">
+        <div class="container site-header__inner">
+            <a class="brand" href="/" aria-label="ATP Rankings Database — home">
+                {{ brand_mark() }}
+                <span>ATP Rankings <span class="brand__sub">Database</span></span>
+            </a>
+            <nav class="site-nav" aria-label="Primary">
+                <a href="/"{% if active_page == "rankings" %} aria-current="page"{% endif %}>Rankings</a>
+                <a href="/compare"{% if active_page == "compare" %} aria-current="page"{% endif %}>Compare<span class="nav-long"> players</span></a>
+                <a href="/weeks-at-no1"{% if active_page == "no1" %} aria-current="page"{% endif %}>Weeks at No. 1</a>
+                <a href="/api-docs"{% if active_page == "docs" %} aria-current="page"{% endif %}>API docs</a>
+            </nav>
+            <button type="button" class="icon-btn theme-toggle" id="themeToggle" aria-label="Toggle color theme">
+                {{ icon("sun", "icon-sun") }}
+                {{ icon("moon", "icon-moon") }}
+            </button>
+        </div>
+    </header>
+
+    <main id="main">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="site-footer">
+        <div class="container site-footer__inner">
+            <span>ATP Rankings Database &middot; Weekly ATP singles rankings since 1973</span>
+            <nav aria-label="Footer">
+                <a href="/api-docs">API documentation</a>
+                <a href="/mcp/health" target="_blank" rel="noopener">MCP server</a>
+                <a href="https://github.com/Jupiterian/ATP-Rankings-API" target="_blank" rel="noopener">GitHub</a>
+            </nav>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', path='js/theme-toggle.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

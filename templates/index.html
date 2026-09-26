@@ -1,247 +1,226 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ATP Rankings Database</title>
-    <link rel="stylesheet" href="{{ url_for('static', path='css/theme.css') }}">
-    <style>
-        .hero-card {
-            display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
-            background: linear-gradient(140deg, rgba(37, 99, 235, 0.1), rgba(14, 165, 233, 0.08)), var(--color-surface);
-            position: relative;
-            overflow: hidden;
-        }
+{% extends "base.html" %}
+{% from "_icons.html" import icon %}
+{% set active_page = "rankings" %}
 
-        .hero-card::after {
-            content: "";
-            position: absolute;
-            inset: 0;
-            background: radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.6), transparent 45%);
-            pointer-events: none;
-        }
+{% block content %}
+{%- set years = weeks_by_year.keys()|list|sort(reverse=True) -%}
+{%- set month_names = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"] -%}
 
-        .hero-content {
-            position: relative;
-            z-index: 1;
-        }
-
-        .hero-actions {
-            position: relative;
-            z-index: 1;
-        }
-
-        .hero-stats {
-            position: relative;
-            z-index: 1;
-        }
-
-        .hero-stat-card {
-            background: var(--color-surface-soft);
-            border-radius: var(--radius-lg);
-            padding: 1.25rem;
-            border: 1px solid var(--color-border);
-            box-shadow: var(--shadow-soft);
-        }
-
-        .hero-stat-card strong {
-            display: block;
-            font-size: 2rem;
-            color: var(--color-primary);
-        }
-
-        .hero-stat-card span {
-            color: var(--color-muted);
-            font-size: 0.95rem;
-        }
-
-        .search-stack {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        .info-callout {
-            display: flex;
-            gap: 0.75rem;
-            align-items: flex-start;
-            background: var(--color-surface-soft);
-            border-radius: var(--radius-lg);
-            padding: 1rem 1.25rem;
-            border-left: 4px solid var(--color-primary);
-            color: var(--color-muted);
-            font-size: 0.95rem;
-        }
-
-        .info-callout strong {
-            color: var(--color-text);
-        }
-
-        .week-grid {
-            max-height: 340px;
-            overflow-y: auto;
-        }
-
-        .stat-bar {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-            color: var(--color-muted);
-            font-size: 0.9rem;
-        }
-
-        @media (max-width: 768px) {
-            .hero-stat-card strong {
-                font-size: 1.4rem;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="page-shell">
-        <section class="surface-card hero-card">
-            <div class="hero-content">
-                <div class="chip">Historic ATP archive</div>
-                <div class="section-heading">
-                    <h1>Explore every ATP ranking week since 1973</h1>
-                    <p>Search 2,600+ Mondays of tennis history, compare players, and plug the data into your own tools or AI agents.</p>
-                </div>
+<section class="hero">
+    <div class="container hero__grid">
+        <div>
+            <span class="eyebrow">Historic ATP archive</span>
+            <h1 class="hero__title">Explore every ATP ranking week since 1973</h1>
+            <p class="lead">Search 2,600+ Mondays of tennis history, compare players, and plug the data into your own tools or AI agents.</p>
+            <div class="hero__actions">
+                <a href="/api-docs" class="btn btn--primary">API documentation</a>
+                <a href="/compare" class="btn btn--secondary">Player comparison</a>
+                <a href="/weeks-at-no1" class="btn btn--secondary">Weeks at #1</a>
             </div>
-            <div class="hero-actions button-row">
-                <a href="/api-docs" class="btn btn--primary"> API documentation</a>
-                <a href="/api/weeks" class="btn btn--secondary" target="_blank"> View raw weeks JSON</a>
-                <a href="/compare" class="btn"> Player comparison</a>
-                <a href="/weeks-at-no1" class="btn btn--ghost"> Weeks at #1</a>
-                <a href="/mcp/health" class="btn btn--success" target="_blank"> MCP Server</a>
+            <div class="hero__links">
+                <a href="/api/weeks" class="link-ext" target="_blank" rel="noopener">View raw weeks JSON {{ icon("external") }}</a>
+                <a href="/mcp/health" class="link-ext" target="_blank" rel="noopener">MCP Server {{ icon("external") }}</a>
             </div>
-            <div class="hero-stats stat-grid">
-                <div class="hero-stat-card">
-                    <strong>{{ total_weeks }}</strong>
-                    <span>Total ranking weeks captured</span>
-                </div>
-                <div class="hero-stat-card">
-                    <strong>{{ weeks_by_year.keys()|list|min }} – {{ weeks_by_year.keys()|list|max }}</strong>
-                    <span>Complete coverage span</span>
-                </div>
-                <div class="hero-stat-card">
-                    <strong>Instant</strong>
-                    <span>No auth or rate limits</span>
-                </div>
+        </div>
+        <dl class="stats">
+            <div class="stat">
+                <dt>Total ranking weeks captured</dt>
+                <dd>{{ "{:,}".format(total_weeks) }}</dd>
             </div>
-        </section>
+            <div class="stat">
+                <dt>Complete coverage span</dt>
+                <dd>{{ years|last }} – {{ years|first }}</dd>
+            </div>
+            <div class="stat">
+                <dt>No auth or rate limits</dt>
+                <dd>Instant</dd>
+            </div>
+        </dl>
+    </div>
+</section>
 
-        <section class="surface-card" style="margin-top: 2.5rem;">
-            <div class="section-heading">
-                <h2>Browse weekly rankings</h2>
+<section class="page" id="archive" aria-labelledby="archive-title">
+    <div class="container">
+        <div class="section-head">
+            <div>
+                <h2 id="archive-title">Browse weekly rankings</h2>
                 <p>Search for a Monday or expand a year to jump straight into any ranking snapshot.</p>
             </div>
-            <div class="search-stack">
-                <label class="input-control" for="searchInput">
-                    <input type="text" id="searchInput" class="search-input" placeholder="Try 2010-01-04, 1995-06-12, etc." aria-label="Search weeks">
+        </div>
+
+        <div class="card">
+            <div class="archive__toolbar">
+                <label class="search-field">
+                    <span class="visually-hidden">Search weeks</span>
+                    {{ icon("search", "search-field__icon") }}
+                    <input type="search" id="searchInput" class="input" placeholder="Try 2010-01-04, 1995-06-12, etc." autocomplete="off" spellcheck="false">
+                    <kbd class="search-field__kbd" aria-hidden="true">/</kbd>
                 </label>
-                <div class="info-callout">
-                    <strong>Tip:</strong>
-                    <span>Start typing to filter both years and weeks instantly. Matching sections stay expanded so you can open them without extra clicks.</span>
-                </div>
+                <p class="field-hint"><strong>Tip:</strong> Start typing to filter both years and weeks instantly. Matching sections stay expanded so you can open them without extra clicks.</p>
             </div>
 
-            <div id="weeksContainer" style="margin-top: 1.5rem;">
-                {% for year in weeks_by_year.keys()|sort(reverse=True) %}
-                <div class="year-panel" data-year="{{ year }}">
-                    <div class="year-panel__header" onclick="toggleYear('{{ year }}')">
-                        <span>{{ year }}</span>
-                        <span class="collapse-icon">▾</span>
+            <nav class="year-index" aria-label="Years">
+                {%- set ns = namespace(decade=None) %}
+                {%- for year in years %}
+                    {%- set decade = year[:3] ~ "0s" %}
+                    {%- if decade != ns.decade %}
+                        {%- if ns.decade %}</div></div>{% endif %}
+                <div class="year-index__row">
+                    <span class="year-index__decade">{{ decade }}</span>
+                    <div class="year-index__years">
+                        {%- set ns.decade = decade %}
+                    {%- endif %}
+                        <a class="year-link" href="#y{{ year }}" data-year-link="{{ year }}"{% if loop.first %} aria-current="true"{% endif %}>{{ year }}</a>
+                {%- endfor %}
+                {%- if ns.decade %}</div></div>{% endif %}
+            </nav>
+
+            <div class="year-panels" id="weeksContainer">
+                {% for year in years %}
+                {%- set weeks = weeks_by_year[year]|sort %}
+                <section class="year-panel{% if loop.first %} is-open{% endif %}" data-year="{{ year }}" aria-label="{{ year }} ranking weeks">
+                    <header class="year-panel__header">
+                        <h3>{{ year }}</h3>
+                        <span class="badge">{{ weeks|length }} weeks</span>
+                    </header>
+                    {#- Kept compact: this loop emits ~2,700 links. -#}
+                    <div class="month-grid">
+                        {%- set ms = namespace(month=None) -%}
+                        {%- for week in weeks -%}
+                            {%- set month = week[5:7] -%}
+                            {%- if month != ms.month -%}
+                                {%- if ms.month %}</div></div>{% endif %}
+<div class="month"><span class="month__label">{{ month_names[month|int - 1] }}</span><div class="month__weeks">
+                                {%- set ms.month = month -%}
+                            {%- endif -%}
+<a href="/week/{{ week }}" aria-label="{{ week }}">{{ week[8:10] }}</a>
+                        {%- endfor -%}
+                        {%- if ms.month %}</div></div>{% endif %}
                     </div>
-                    <div class="year-panel__body">
-                        <div class="week-grid" id="weeks-{{ year }}">
-                            {% for week in weeks_by_year[year]|sort(reverse=True) %}
-                            <a href="/week/{{ week }}" class="week-chip" data-week="{{ week }}">
-                                {{ week }}
-                            </a>
-                            {% endfor %}
-                        </div>
-                    </div>
-                </div>
+                </section>
                 {% endfor %}
-            </div>
-        </section>
-    </div>
-    
-    <script>
-        // Search functionality
-        const searchInput = document.getElementById('searchInput');
-        const yearPanels = document.querySelectorAll('.year-panel');
 
-        searchInput.addEventListener('input', function(e) {
-            const searchTerm = e.target.value.toLowerCase();
-            
-            if (searchTerm === '') {
-                // Show all sections
-                yearPanels.forEach(panel => {
-                    panel.style.display = 'block';
-                    const weekLinks = panel.querySelectorAll('.week-chip');
-                    weekLinks.forEach(link => link.style.display = 'flex');
-                    const grid = panel.querySelector('.week-grid');
-                    grid.classList.add('is-hidden');
-                    panel.querySelector('.year-panel__header').classList.add('is-collapsed');
-                });
-                return;
-            }
-            
-            yearPanels.forEach(panel => {
-                const weekLinks = panel.querySelectorAll('.week-chip');
-                let hasVisibleWeeks = false;
-                
-                weekLinks.forEach(link => {
-                    const weekDate = link.getAttribute('data-week');
-                    if (weekDate.toLowerCase().includes(searchTerm)) {
-                        link.style.display = 'flex';
-                        hasVisibleWeeks = true;
-                    } else {
-                        link.style.display = 'none';
-                    }
-                });
-                
-                // Show/hide year section based on whether it has visible weeks
-                panel.style.display = hasVisibleWeeks ? 'block' : 'none';
-                
-                // Expand sections with results
-                if (hasVisibleWeeks) {
-                    const weeksGrid = panel.querySelector('.week-grid');
-                    const yearHeader = panel.querySelector('.year-panel__header');
-                    weeksGrid.classList.remove('is-hidden');
-                    yearHeader.classList.remove('is-collapsed');
-                }
+                <div class="empty-state" id="noMatches" hidden>
+                    {{ icon("search-x") }}
+                    <h3>No matching weeks</h3>
+                    <p>Try a date such as 2010-01-04, or just a year like 1995.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    (function () {
+        const searchInput = document.getElementById('searchInput');
+        const archive = document.getElementById('archive');
+        const noMatches = document.getElementById('noMatches');
+        const yearLinks = Array.from(document.querySelectorAll('[data-year-link]'));
+
+        // Index the DOM once so filtering is a cheap walk over plain arrays.
+        const panels = Array.from(document.querySelectorAll('.year-panel')).map(panel => ({
+            el: panel,
+            year: panel.dataset.year,
+            months: Array.from(panel.querySelectorAll('.month')).map(month => ({
+                el: month,
+                weeks: Array.from(month.querySelectorAll('a')).map(link => ({
+                    el: link,
+                    date: link.getAttribute('href').slice('/week/'.length)
+                }))
+            }))
+        }));
+
+        let selectedYear = panels.length ? panels[0].year : null;
+
+        function showYear(year) {
+            selectedYear = year;
+            panels.forEach(panel => panel.el.classList.toggle('is-open', panel.year === year));
+            yearLinks.forEach(link => {
+                if (link.dataset.yearLink === year) link.setAttribute('aria-current', 'true');
+                else link.removeAttribute('aria-current');
             });
-        });
-        
-        // Toggle year sections
-        function toggleYear(year) {
-            const panel = document.querySelector(`[data-year="${year}"]`);
-            const weeksGrid = panel.querySelector('.week-grid');
-            const yearHeader = panel.querySelector('.year-panel__header');
-            weeksGrid.classList.toggle('is-hidden');
-            yearHeader.classList.toggle('is-collapsed');
         }
-        
-        // Collapse all years by default except the most recent
-        document.addEventListener('DOMContentLoaded', function() {
-            const panels = document.querySelectorAll('.year-panel');
-            panels.forEach((panel, index) => {
-                const weeksGrid = panel.querySelector('.week-grid');
-                const yearHeader = panel.querySelector('.year-panel__header');
-                if (index === 0) {
-                    weeksGrid.classList.remove('is-hidden');
-                    yearHeader.classList.remove('is-collapsed');
-                } else {
-                    weeksGrid.classList.add('is-hidden');
-                    yearHeader.classList.add('is-collapsed');
-                }
+
+        function clearFilter() {
+            panels.forEach(panel => panel.months.forEach(month => {
+                month.el.hidden = false;
+                month.weeks.forEach(week => { week.el.hidden = false; });
+            }));
+            yearLinks.forEach(link => link.classList.remove('is-dimmed'));
+            noMatches.hidden = true;
+            showYear(selectedYear);
+        }
+
+        function applyFilter(term) {
+            const matchingYears = new Set();
+            panels.forEach(panel => {
+                let panelMatches = false;
+                panel.months.forEach(month => {
+                    let monthMatches = false;
+                    month.weeks.forEach(week => {
+                        const match = week.date.includes(term);
+                        week.el.hidden = !match;
+                        monthMatches = monthMatches || match;
+                    });
+                    month.el.hidden = !monthMatches;
+                    panelMatches = panelMatches || monthMatches;
+                });
+                // Matching years stay expanded so results are one click away.
+                panel.el.classList.toggle('is-open', panelMatches);
+                if (panelMatches) matchingYears.add(panel.year);
+            });
+            yearLinks.forEach(link => {
+                link.removeAttribute('aria-current');
+                link.classList.toggle('is-dimmed', !matchingYears.has(link.dataset.yearLink));
+            });
+            noMatches.hidden = matchingYears.size > 0;
+        }
+
+        searchInput.addEventListener('input', () => {
+            const term = searchInput.value.trim().toLowerCase();
+            if (term) applyFilter(term);
+            else clearFilter();
+        });
+
+        searchInput.addEventListener('keydown', event => {
+            if (event.key === 'Escape' && searchInput.value) {
+                searchInput.value = '';
+                clearFilter();
+            }
+        });
+
+        yearLinks.forEach(link => {
+            link.addEventListener('click', event => {
+                event.preventDefault();
+                if (searchInput.value) searchInput.value = '';
+                clearFilter();
+                showYear(link.dataset.yearLink);
+                history.replaceState(null, '', '#y' + link.dataset.yearLink);
             });
         });
-    </script>
-    <script src="{{ url_for('static', path='js/theme-toggle.js') }}"></script>
-</body>
-</html>
+
+        // "/" focuses the search box from anywhere on the page.
+        document.addEventListener('keydown', event => {
+            if (event.key !== '/' || event.metaKey || event.ctrlKey || event.altKey) return;
+            if (event.target.closest('input, textarea, select, [contenteditable="true"]')) return;
+            event.preventDefault();
+            searchInput.focus();
+        });
+
+        // Deep links such as /#y1995 (used by "Back to archive") open that year.
+        function openYearFromHash() {
+            const match = /^#y(\d{4})$/.exec(location.hash);
+            if (!match || !panels.some(panel => panel.year === match[1])) return;
+            if (searchInput.value) searchInput.value = '';
+            clearFilter();
+            showYear(match[1]);
+            archive.scrollIntoView({ block: 'start' });
+        }
+
+        window.addEventListener('hashchange', openYearFromHash);
+        openYearFromHash();
+    })();
+</script>
+{% endblock %}

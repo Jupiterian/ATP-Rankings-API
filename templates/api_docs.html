@@ -1,287 +1,113 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>API Documentation - ATP Rankings</title>
-    <link rel="stylesheet" href="{{ url_for('static', path='css/theme.css') }}">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+{% extends "base.html" %}
+{% from "_icons.html" import icon %}
+{% set active_page = "docs" %}
+{% set base_url = request.url.scheme ~ "://" ~ request.url.netloc %}
 
-        body {
-            font-family: var(--font-base);
-            background: var(--color-bg);
-            background-image: var(--color-bg-gradient);
-            min-height: 100vh;
-            padding: clamp(1.5rem, 4vw, 3rem) 0;
-        }
+{% macro codeblock(lang) -%}
+<div class="code-block"><pre><code class="language-{{ lang }}">{{ caller() }}</code></pre></div>
+{%- endmacro %}
 
-        .container {
-            width: min(1200px, 100% - 32px);
-            margin: 0 auto;
-            display: flex;
-            flex-direction: column;
-            gap: 2rem;
-        }
+{% macro try_link(href, label) -%}
+<div class="endpoint__foot">
+    <a href="{{ href }}" class="btn btn--secondary btn--sm" target="_blank" rel="noopener">{{ label }} {{ icon("external") }}</a>
+</div>
+{%- endmacro %}
 
-        .header {
-            text-align: center;
-            padding: clamp(1.5rem, 4vw, 3rem);
-            background: var(--color-surface);
-            border-radius: var(--radius-xl);
-            box-shadow: var(--shadow-lg);
-            border: 1px solid rgba(255, 255, 255, 0.7);
-        }
+{% block title %}API Documentation - ATP Rankings{% endblock %}
+{% block description %}RESTful API for ATP Rankings Historical Data.{% endblock %}
 
-        h1 {
-            color: var(--color-text);
-            margin-bottom: 0.5rem;
-            font-size: clamp(2rem, 4vw, 2.75rem);
-        }
+{% block head %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" defer></script>
+{% endblock %}
 
-        .subtitle {
-            color: var(--color-muted);
-            font-size: 1.05rem;
-        }
-
-        .button-row {
-            justify-content: center;
-        }
-
-        .section {
-            background: var(--color-surface);
-            border-radius: var(--radius-xl);
-            padding: clamp(1.5rem, 3vw, 2.75rem);
-            box-shadow: var(--shadow-md);
-            border: 1px solid rgba(226, 232, 240, 0.7);
-        }
-
-        h2 {
-            color: var(--color-text);
-            margin-bottom: 1rem;
-            font-size: clamp(1.5rem, 3vw, 2rem);
-        }
-
-        h3 {
-            color: var(--color-text);
-            margin: 1.5rem 0 0.75rem;
-            font-size: 1.2rem;
-        }
-
-        .endpoint {
-            background: var(--color-surface-soft);
-            padding: 1.25rem;
-            border-radius: var(--radius-lg);
-            border: 1px solid rgba(226, 232, 240, 0.8);
-            margin-bottom: 1.25rem;
-            box-shadow: var(--shadow-soft);
-        }
-
-        .method {
-            display: inline-flex;
-            padding: 0.4rem 0.9rem;
-            border-radius: var(--radius-pill);
-            font-weight: 700;
-            font-size: 0.85rem;
-            letter-spacing: 0.05em;
-            background: rgba(34, 197, 94, 0.15);
-            color: var(--color-success);
-        }
-
-        .url {
-            font-family: 'JetBrains Mono', 'Courier New', monospace;
-            background: rgba(15, 23, 42, 0.04);
-            padding: 0.55rem 0.9rem;
-            border-radius: var(--radius-md);
-            display: inline-flex;
-            margin-top: 0.5rem;
-            color: var(--color-text);
-            font-size: 0.95rem;
-        }
-
-        .description {
-            margin-top: 0.75rem;
-            color: var(--color-muted);
-            line-height: 1.7;
-        }
-
-        .parameters,
-        .response {
-            margin-top: 1rem;
-        }
-
-        .param-title,
-        .response-title {
-            font-weight: 700;
-            color: var(--color-text);
-            margin-bottom: 0.45rem;
-        }
-
-        .param {
-            background: white;
-            padding: 0.9rem;
-            margin-bottom: 0.6rem;
-            border-radius: var(--radius-md);
-            border: 1px dashed rgba(37, 99, 235, 0.25);
-        }
-
-        .param-name {
-            font-family: 'JetBrains Mono', 'Courier New', monospace;
-            color: var(--color-primary);
-            font-weight: 600;
-        }
-
-        .param-type {
-            color: var(--color-muted);
-            font-size: 0.9rem;
-            font-style: italic;
-        }
-
-        .code-block {
-            background: #0f172a;
-            color: #f8fafc;
-            padding: 1rem;
-            border-radius: var(--radius-md);
-            overflow-x: auto;
-            font-family: 'JetBrains Mono', 'Courier New', monospace;
-            font-size: 0.9rem;
-            line-height: 1.6;
-            border: 1px solid rgba(15, 23, 42, 0.4);
-        }
-
-        .try-button {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.4rem;
-            margin-top: 0.75rem;
-            padding: 0.65rem 1.2rem;
-            background: var(--color-primary);
-            color: white;
-            text-decoration: none;
-            border-radius: var(--radius-pill);
-            font-size: 0.95rem;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-            box-shadow: 0 12px 24px rgba(37, 99, 235, 0.3);
-        }
-
-        .try-button:hover {
-            transform: translateY(-2px);
-        }
-
-        .info-box {
-            background: var(--color-surface-soft);
-            border-radius: var(--radius-lg);
-            border: 1px solid var(--color-border);
-            padding: 1rem 1.25rem;
-            margin: 1.25rem 0;
-            color: var(--color-text);
-            display: inline-flex;
-            gap: 0.5rem;
-            align-items: center;
-        }
-
-        .info-box code {
-            font-family: 'JetBrains Mono', 'Courier New', monospace;
-            background: rgba(15, 23, 42, 0.06);
-            padding: 0.35rem 0.6rem;
-            border-radius: var(--radius-md);
-        }
-
-        .example-list {
-            list-style: none;
-            padding-left: 0;
-            margin: 1rem 0 0;
-        }
-
-        .example-list li {
-            padding: 0.35rem 0;
-            color: var(--color-muted);
-        }
-
-        .example-list li::before {
-            content: "▸";
-            color: var(--color-primary);
-            margin-right: 0.5rem;
-        }
-
-        @media (max-width: 768px) {
-            .section,
-            .header {
-                padding: 1.25rem;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1> API Documentation</h1>
-            <p class="subtitle">RESTful API for ATP Rankings Historical Data</p>
+{% block content %}
+<div class="container page">
+    <header class="page-header">
+        <div class="page-header__text">
+            <h1>API Documentation</h1>
+            <p class="lead">RESTful API for ATP Rankings Historical Data</p>
         </div>
-        
-        <div class="button-row">
-            <a href="/" class="btn"> Home</a>
-            <a href="/compare" class="btn btn--secondary"> Compare Players</a>
-            <a href="/weeks-at-no1" class="btn"> Weeks at #1</a>
-            <a href="/mcp/health" class="btn btn--ghost" target="_blank"> MCP Health</a>
-            <a href="/api/weeks" class="btn btn--primary" target="_blank"> Try /api/weeks</a>
+        <div class="page-header__actions">
+            <a href="/mcp/health" class="btn btn--secondary" target="_blank" rel="noopener">MCP Health {{ icon("external") }}</a>
+            <a href="/api/weeks" class="btn btn--primary" target="_blank" rel="noopener">Try /api/weeks {{ icon("external") }}</a>
         </div>
-        
-        <!-- Introduction Section -->
-        <div class="section">
-            <h2>Introduction</h2>
-            <p class="description">
-                The ATP Rankings API provides programmatic access to historical ATP tennis rankings data spanning from 1973 to present. 
-                All endpoints return JSON responses and require no authentication.
-            </p>
-            
-            <div class="info-box">
-                <strong>Base URL:</strong> <code>{{ request.url.scheme }}://{{ request.url.netloc }}</code>
-            </div>
-            
-            <h3>Features</h3>
-            <ul class="example-list">
-                <li>Access over 2,600 weeks of ATP rankings data</li>
-                <li>Retrieve complete rankings for any specific week</li>
-                <li>Search for players with autocomplete functionality</li>
-                <li>Get comprehensive player statistics and career facts</li>
-                <li>Access time-series data for player rankings and points</li>
-                <li>Get historical weeks at number 1 statistics for all players</li>
-                <li>Interactive player comparison tool with career graphs</li>
-                <li>Weeks at #1 histogram visualization</li>
-                <li>JSON response format for easy integration</li>
-                <li>No rate limiting or authentication required</li>
-                <li>CORS enabled for browser-based applications</li>
+    </header>
+
+    <div class="docs-layout">
+        <nav class="docs-toc" aria-label="On this page">
+            <div class="docs-toc__title">On this page</div>
+            <ul>
+                <li><a href="#introduction">Introduction</a></li>
+                <li>
+                    <a href="#endpoints">API Endpoints</a>
+                    <ul>
+                        <li><a href="#get-weeks">/api/weeks</a></li>
+                        <li><a href="#get-week">/api/week/{week_date}</a></li>
+                        <li><a href="#get-weeks-at-no1">/api/weeks-at-no1</a></li>
+                        <li><a href="#search-players">/api/players/search</a></li>
+                        <li><a href="#player-factfile">/api/player/factfile</a></li>
+                        <li><a href="#player-career">/api/player/career</a></li>
+                    </ul>
+                </li>
+                <li><a href="#usage-examples">Usage Examples</a></li>
+                <li><a href="#response-format">Response Format</a></li>
+                <li><a href="#best-practices">Best Practices</a></li>
+                <li><a href="#mcp-server">MCP Server</a></li>
+                <li><a href="#support">Support</a></li>
             </ul>
-        </div>
-        
-        <!-- Endpoints Section -->
-        <div class="section">
-            <h2>API Endpoints</h2>
-            <p class="description" style="margin-bottom: 20px;">
-                The API provides <strong>6 endpoints</strong> for accessing ATP rankings data, player statistics, and historical records.
-            </p>
-            
-            <!-- Endpoint 1: Get All Weeks -->
-            <div class="endpoint">
-                <h3>Get All Available Weeks</h3>
-                <div>
-                    <span class="method get">GET</span>
-                    <span class="url">/api/weeks</span>
+        </nav>
+
+        <div class="docs-content">
+            <!-- Introduction -->
+            <section class="docs-section" id="introduction">
+                <h2>Introduction</h2>
+                <p class="prose">
+                    The ATP Rankings API provides programmatic access to historical ATP tennis rankings data spanning from 1973 to present.
+                    All endpoints return JSON responses and require no authentication.
+                </p>
+
+                <div class="base-url">
+                    <strong>Base URL:</strong>
+                    <code data-copy-source>{{ base_url }}</code>
                 </div>
-                
-                <div class="description">
-                    Returns a list of all available weeks (dates) for which rankings data is available. 
-                    Weeks are returned in descending chronological order (newest first).
-                </div>
-                
-                <div class="response">
-                    <div class="response-title">Response Example:</div>
-                    <pre class="code-block">{
+
+                <h3>Features</h3>
+                <ul class="check-list">
+                    <li>{{ icon("check") }}<span>Access over 2,600 weeks of ATP rankings data</span></li>
+                    <li>{{ icon("check") }}<span>Retrieve complete rankings for any specific week</span></li>
+                    <li>{{ icon("check") }}<span>Search for players with autocomplete functionality</span></li>
+                    <li>{{ icon("check") }}<span>Get comprehensive player statistics and career facts</span></li>
+                    <li>{{ icon("check") }}<span>Access time-series data for player rankings and points</span></li>
+                    <li>{{ icon("check") }}<span>Get historical weeks at number 1 statistics for all players</span></li>
+                    <li>{{ icon("check") }}<span>Interactive player comparison tool with career graphs</span></li>
+                    <li>{{ icon("check") }}<span>Weeks at #1 histogram visualization</span></li>
+                    <li>{{ icon("check") }}<span>JSON response format for easy integration</span></li>
+                    <li>{{ icon("check") }}<span>No rate limiting or authentication required</span></li>
+                    <li>{{ icon("check") }}<span>CORS enabled for browser-based applications</span></li>
+                </ul>
+            </section>
+
+            <!-- Endpoints -->
+            <section class="docs-section" id="endpoints">
+                <h2>API Endpoints</h2>
+                <p class="prose">
+                    The API provides <strong>6 endpoints</strong> for accessing ATP rankings data, player statistics, and historical records.
+                </p>
+
+                <!-- Endpoint 1: Get All Weeks -->
+                <article class="endpoint" id="get-weeks">
+                    <header class="endpoint__head">
+                        <h3>Get All Available Weeks</h3>
+                        <div class="endpoint__sig"><span class="method">GET</span><code>/api/weeks</code></div>
+                    </header>
+                    <div class="endpoint__body">
+                        <p class="prose">
+                            Returns a list of all available weeks (dates) for which rankings data is available.
+                            Weeks are returned in descending chronological order (newest first).
+                        </p>
+
+                        <h4>Response Example</h4>
+                        {% call codeblock("json") %}{
   "weeks": [
     "2025-04-21",
     "2025-04-14",
@@ -291,38 +117,39 @@
     "1973-09-03",
     "1973-08-27"
   ]
-}</pre>
-                </div>
-                
-                <a href="/api/weeks" class="try-button" target="_blank">Try it now →</a>
-            </div>
-            
-            <!-- Endpoint 2: Get Week Data -->
-            <div class="endpoint">
-                <h3>Get Rankings for a Specific Week</h3>
-                <div>
-                    <span class="method get">GET</span>
-                    <span class="url">/api/week/{week_date}</span>
-                </div>
-                
-                <div class="description">
-                    Returns the complete ATP rankings for a specific week, including rank, player name, and points for all ranked players.
-                </div>
-                
-                <div class="parameters">
-                    <div class="param-title">Path Parameters:</div>
-                    <div class="param">
-                        <span class="param-name">week_date</span>
-                        <span class="param-type">(string, required)</span>
-                        <div style="margin-top: 5px; color: #666;">
-                            The date of the week in YYYY-MM-DD format (e.g., "2023-01-02")
-                        </div>
+}{% endcall %}
+
+                        {{ try_link("/api/weeks", "Try it now") }}
                     </div>
-                </div>
-                
-                <div class="response">
-                    <div class="response-title">Response Example:</div>
-                    <pre class="code-block">{
+                </article>
+
+                <!-- Endpoint 2: Get Week Data -->
+                <article class="endpoint" id="get-week">
+                    <header class="endpoint__head">
+                        <h3>Get Rankings for a Specific Week</h3>
+                        <div class="endpoint__sig"><span class="method">GET</span><code>/api/week/{week_date}</code></div>
+                    </header>
+                    <div class="endpoint__body">
+                        <p class="prose">
+                            Returns the complete ATP rankings for a specific week, including rank, player name, and points for all ranked players.
+                        </p>
+
+                        <h4>Path Parameters</h4>
+                        <div class="param-table">
+                            <table class="data-table">
+                                <thead><tr><th scope="col">Parameter</th><th scope="col">Type</th><th scope="col">Description</th></tr></thead>
+                                <tbody>
+                                    <tr>
+                                        <td><code>week_date</code></td>
+                                        <td class="param-type">string, required</td>
+                                        <td>The date of the week in YYYY-MM-DD format (e.g., "2023-01-02")</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <h4>Response Example</h4>
+                        {% call codeblock("json") %}{
   "week": "2023-01-02",
   "rankings": [
     {
@@ -342,35 +169,31 @@
     },
     ...
   ]
-}</pre>
-                </div>
-                
-                <div class="response">
-                    <div class="response-title">Error Response (404):</div>
-                    <pre class="code-block">{
+}{% endcall %}
+
+                        <h4>Error Response (404)</h4>
+                        {% call codeblock("json") %}{
   "detail": "Week 2099-01-01 not found"
-}</pre>
-                </div>
-                
-                <a href="/api/week/2023-01-02" class="try-button" target="_blank">Try with 2023-01-02 →</a>
-            </div>
-            
-            <!-- Endpoint 3: Get Weeks at No. 1 -->
-            <div class="endpoint">
-                <h3>Get Weeks at Number 1 for All Players</h3>
-                <div>
-                    <span class="method get">GET</span>
-                    <span class="url">/api/weeks-at-no1</span>
-                </div>
-                
-                <div class="description">
-                    Returns all players who have held the world number 1 ranking and the number of weeks they spent at #1. 
-                    Results are sorted by weeks in descending order.
-                </div>
-                
-                <div class="response">
-                    <div class="response-title">Response Example:</div>
-                    <pre class="code-block">[
+}{% endcall %}
+
+                        {{ try_link("/api/week/2023-01-02", "Try with 2023-01-02") }}
+                    </div>
+                </article>
+
+                <!-- Endpoint 3: Get Weeks at No. 1 -->
+                <article class="endpoint" id="get-weeks-at-no1">
+                    <header class="endpoint__head">
+                        <h3>Get Weeks at Number 1 for All Players</h3>
+                        <div class="endpoint__sig"><span class="method">GET</span><code>/api/weeks-at-no1</code></div>
+                    </header>
+                    <div class="endpoint__body">
+                        <p class="prose">
+                            Returns all players who have held the world number 1 ranking and the number of weeks they spent at #1.
+                            Results are sorted by weeks in descending order.
+                        </p>
+
+                        <h4>Response Example</h4>
+                        {% call codeblock("json") %}[
   {
     "player": "Novak Djokovic",
     "weeks": 428
@@ -388,84 +211,84 @@
     "weeks": 209
   },
   ...
-]</pre>
-                </div>
-                
-                <a href="/api/weeks-at-no1" class="try-button" target="_blank">Try it now →</a>
-            </div>
-            
-            <!-- Endpoint 4: Search Players -->
-            <div class="endpoint">
-                <h3>Search for Players</h3>
-                <div>
-                    <span class="method get">GET</span>
-                    <span class="url">/api/players/search</span>
-                </div>
-                
-                <div class="description">
-                    Search for players in the database by name. Returns a list of player names that match the search query.
-                    Useful for autocomplete functionality.
-                </div>
-                
-                <div class="parameters">
-                    <div class="param-title">Query Parameters:</div>
-                    <div class="param">
-                        <span class="param-name">q</span>
-                        <span class="param-type">(string, required)</span>
-                        <div style="margin-top: 5px; color: #666;">
-                            The search query string (e.g., "federer", "djokovic")
-                        </div>
+]{% endcall %}
+
+                        {{ try_link("/api/weeks-at-no1", "Try it now") }}
                     </div>
-                    <div class="param">
-                        <span class="param-name">limit</span>
-                        <span class="param-type">(integer, optional, default: 10)</span>
-                        <div style="margin-top: 5px; color: #666;">
-                            Maximum number of results to return
+                </article>
+
+                <!-- Endpoint 4: Search Players -->
+                <article class="endpoint" id="search-players">
+                    <header class="endpoint__head">
+                        <h3>Search for Players</h3>
+                        <div class="endpoint__sig"><span class="method">GET</span><code>/api/players/search</code></div>
+                    </header>
+                    <div class="endpoint__body">
+                        <p class="prose">
+                            Search for players in the database by name. Returns a list of player names that match the search query.
+                            Useful for autocomplete functionality.
+                        </p>
+
+                        <h4>Query Parameters</h4>
+                        <div class="param-table">
+                            <table class="data-table">
+                                <thead><tr><th scope="col">Parameter</th><th scope="col">Type</th><th scope="col">Description</th></tr></thead>
+                                <tbody>
+                                    <tr>
+                                        <td><code>q</code></td>
+                                        <td class="param-type">string, required</td>
+                                        <td>The search query string (e.g., "federer", "djokovic")</td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>limit</code></td>
+                                        <td class="param-type">integer, optional, default: 10</td>
+                                        <td>Maximum number of results to return</td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
-                    </div>
-                </div>
-                
-                <div class="response">
-                    <div class="response-title">Response Example:</div>
-                    <pre class="code-block">{
+
+                        <h4>Response Example</h4>
+                        {% call codeblock("json") %}{
   "players": [
     "Roger Federer",
     "Federer Jr.",
     ...
   ]
-}</pre>
-                </div>
-                
-                <a href="/api/players/search?q=federer&limit=5" class="try-button" target="_blank">Try with "federer" →</a>
-            </div>
-            
-            <!-- Endpoint 5: Player Factfile -->
-            <div class="endpoint">
-                <h3>Get Player Factfile/Statistics</h3>
-                <div>
-                    <span class="method get">GET</span>
-                    <span class="url">/api/player/factfile</span>
-                </div>
-                
-                <div class="description">
-                    Returns comprehensive career statistics for a specific player including career high ranking, 
-                    maximum points, and weeks spent in various ranking tiers.
-                </div>
-                
-                <div class="parameters">
-                    <div class="param-title">Query Parameters:</div>
-                    <div class="param">
-                        <span class="param-name">player</span>
-                        <span class="param-type">(string, required)</span>
-                        <div style="margin-top: 5px; color: #666;">
-                            The exact player name (e.g., "Roger Federer", "Rafael Nadal")
-                        </div>
+}{% endcall %}
+
+                        {{ try_link("/api/players/search?q=federer&limit=5", 'Try with "federer"') }}
                     </div>
-                </div>
-                
-                <div class="response">
-                    <div class="response-title">Response Example:</div>
-                    <pre class="code-block">{
+                </article>
+
+                <!-- Endpoint 5: Player Factfile -->
+                <article class="endpoint" id="player-factfile">
+                    <header class="endpoint__head">
+                        <h3>Get Player Factfile/Statistics</h3>
+                        <div class="endpoint__sig"><span class="method">GET</span><code>/api/player/factfile</code></div>
+                    </header>
+                    <div class="endpoint__body">
+                        <p class="prose">
+                            Returns comprehensive career statistics for a specific player including career high ranking,
+                            maximum points, and weeks spent in various ranking tiers.
+                        </p>
+
+                        <h4>Query Parameters</h4>
+                        <div class="param-table">
+                            <table class="data-table">
+                                <thead><tr><th scope="col">Parameter</th><th scope="col">Type</th><th scope="col">Description</th></tr></thead>
+                                <tbody>
+                                    <tr>
+                                        <td><code>player</code></td>
+                                        <td class="param-type">string, required</td>
+                                        <td>The exact player name (e.g., "Roger Federer", "Rafael Nadal")</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <h4>Response Example</h4>
+                        {% call codeblock("json") %}{
   "player": "Roger Federer",
   "career_high_rank": 1,
   "career_high_date": "2004-02-02",
@@ -474,70 +297,78 @@
   "weeks_top_100": 1234,
   "weeks_top_10": 890,
   "weeks_at_1": 310
-}</pre>
-                </div>
-                
-                <div class="response">
-                    <div class="response-title">Error Response (404):</div>
-                    <pre class="code-block">{
+}{% endcall %}
+
+                        <h4>Error Response (404)</h4>
+                        {% call codeblock("json") %}{
   "detail": "Player Roger Federerr not found"
-}</pre>
-                </div>
-                
-                <a href="/api/player/factfile?player=Roger%20Federer" class="try-button" target="_blank">Try with Roger Federer →</a>
-            </div>
-            
-            <!-- Endpoint 6: Player Career Data -->
-            <div class="endpoint">
-                <h3>Get Player Career Data for Charts</h3>
-                <div>
-                    <span class="method get">GET</span>
-                    <span class="url">/api/player/career</span>
-                </div>
-                
-                <div class="description">
-                    Returns time-series data of a player's ranking and points history throughout their career.
-                    This data is used for generating career progression charts and visualizations.
-                </div>
-                
-                <div class="parameters">
-                    <div class="param-title">Query Parameters:</div>
-                    <div class="param">
-                        <span class="param-name">player</span>
-                        <span class="param-type">(string, required)</span>
-                        <div style="margin-top: 5px; color: #666;">
-                            The exact player name (e.g., "Rafael Nadal", "Novak Djokovic")
-                        </div>
+}{% endcall %}
+
+                        {{ try_link("/api/player/factfile?player=Roger%20Federer", "Try with Roger Federer") }}
                     </div>
-                </div>
-                
-                <div class="response">
-                    <div class="response-title">Response Example:</div>
-                    <pre class="code-block">{
+                </article>
+
+                <!-- Endpoint 6: Player Career Data -->
+                <article class="endpoint" id="player-career">
+                    <header class="endpoint__head">
+                        <h3>Get Player Career Data for Charts</h3>
+                        <div class="endpoint__sig"><span class="method">GET</span><code>/api/player/career</code></div>
+                    </header>
+                    <div class="endpoint__body">
+                        <p class="prose">
+                            Returns time-series data of a player's ranking and points history throughout their career.
+                            This data is used for generating career progression charts and visualizations.
+                        </p>
+
+                        <h4>Query Parameters</h4>
+                        <div class="param-table">
+                            <table class="data-table">
+                                <thead><tr><th scope="col">Parameter</th><th scope="col">Type</th><th scope="col">Description</th></tr></thead>
+                                <tbody>
+                                    <tr>
+                                        <td><code>player</code></td>
+                                        <td class="param-type">string, required</td>
+                                        <td>The exact player name (e.g., "Rafael Nadal", "Novak Djokovic")</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <h4>Response Example</h4>
+                        {% call codeblock("json") %}{
   "player": "Rafael Nadal",
   "ranking_dates": ["2005-08-08", "2005-08-15", "2005-08-22", ...],
   "rankings": [49, 45, 43, 40, ...],
   "points_dates": ["2005-08-08", "2005-08-15", "2005-08-22", ...],
   "points": [823, 845, 890, 912, ...]
-}</pre>
-                </div>
-                
-                <div class="info-box">
-                    <strong>Note:</strong> The points arrays only include weeks where the player had non-zero points. 
-                    Ranking arrays include all weeks where the player was in the top 100.
-                </div>
-                
-                <a href="/api/player/career?player=Rafael%20Nadal" class="try-button" target="_blank">Try with Rafael Nadal →</a>
-            </div>
-        </div>
-        
-        <!-- Usage Examples Section -->
-        <div class="section">
-            <h2>Usage Examples</h2>
-            
-            <h3>JavaScript (Fetch API)</h3>
-            <pre class="code-block">// Get all available weeks
-fetch('{{ request.url.scheme }}://{{ request.url.netloc }}/api/weeks')
+}{% endcall %}
+
+                        <div class="callout" style="margin-top: 14px;">
+                            {{ icon("info") }}
+                            <span><strong>Note:</strong> The points arrays only include weeks where the player had non-zero points.
+                            Ranking arrays include all weeks where the player was in the top 100.</span>
+                        </div>
+
+                        {{ try_link("/api/player/career?player=Rafael%20Nadal", "Try with Rafael Nadal") }}
+                    </div>
+                </article>
+            </section>
+
+            <!-- Usage Examples -->
+            <section class="docs-section" id="usage-examples">
+                <h2>Usage Examples</h2>
+
+                <div class="code-tabs" data-tabs>
+                    <div class="code-tabs__list" role="tablist" aria-label="Example language">
+                        <button type="button" role="tab" id="tab-js" aria-controls="panel-js" aria-selected="true">JavaScript (Fetch API)</button>
+                        <button type="button" role="tab" id="tab-python" aria-controls="panel-python" aria-selected="false" tabindex="-1">Python (Requests)</button>
+                        <button type="button" role="tab" id="tab-curl" aria-controls="panel-curl" aria-selected="false" tabindex="-1">cURL</button>
+                    </div>
+
+                    <div role="tabpanel" id="panel-js" aria-labelledby="tab-js">
+                        <h3 class="code-tabs__panel-title">JavaScript (Fetch API)</h3>
+                        {% call codeblock("javascript") %}// Get all available weeks
+fetch('{{ base_url }}/api/weeks')
   .then(response => response.json())
   .then(data => {
     console.log('Total weeks:', data.weeks.length);
@@ -545,7 +376,7 @@ fetch('{{ request.url.scheme }}://{{ request.url.netloc }}/api/weeks')
   });
 
 // Get rankings for a specific week
-fetch('{{ request.url.scheme }}://{{ request.url.netloc }}/api/week/2023-01-02')
+fetch('{{ base_url }}/api/week/2023-01-02')
   .then(response => response.json())
   .then(data => {
     console.log('Week:', data.week);
@@ -553,7 +384,7 @@ fetch('{{ request.url.scheme }}://{{ request.url.netloc }}/api/week/2023-01-02')
   });
 
 // Get weeks at number 1 statistics
-fetch('{{ request.url.scheme }}://{{ request.url.netloc }}/api/weeks-at-no1')
+fetch('{{ base_url }}/api/weeks-at-no1')
   .then(response => response.json())
   .then(data => {
     console.log('Total players who reached #1:', data.length);
@@ -561,14 +392,14 @@ fetch('{{ request.url.scheme }}://{{ request.url.netloc }}/api/weeks-at-no1')
   });
 
 // Search for players
-fetch('{{ request.url.scheme }}://{{ request.url.netloc }}/api/players/search?q=federer&limit=5')
+fetch('{{ base_url }}/api/players/search?q=federer&limit=5')
   .then(response => response.json())
   .then(data => {
     console.log('Found players:', data.players);
   });
 
 // Get player factfile
-fetch('{{ request.url.scheme }}://{{ request.url.netloc }}/api/player/factfile?player=Roger%20Federer')
+fetch('{{ base_url }}/api/player/factfile?player=Roger%20Federer')
   .then(response => response.json())
   .then(data => {
     console.log(`${data.player}: Career High #${data.career_high_rank}`);
@@ -576,168 +407,272 @@ fetch('{{ request.url.scheme }}://{{ request.url.netloc }}/api/player/factfile?p
   });
 
 // Get player career data for charts
-fetch('{{ request.url.scheme }}://{{ request.url.netloc }}/api/player/career?player=Rafael%20Nadal')
+fetch('{{ base_url }}/api/player/career?player=Rafael%20Nadal')
   .then(response => response.json())
   .then(data => {
     console.log(`Career data points: ${data.rankings.length} weeks`);
     console.log(`Best ranking: #${Math.min(...data.rankings)}`);
-  });</pre>
-            
-            <h3>Python (Requests)</h3>
-            <pre class="code-block">import requests
+  });{% endcall %}
+                    </div>
+
+                    <div role="tabpanel" id="panel-python" aria-labelledby="tab-python" hidden>
+                        <h3 class="code-tabs__panel-title">Python (Requests)</h3>
+                        {% call codeblock("python") %}import requests
 
 # Get all available weeks
-response = requests.get('{{ request.url.scheme }}://{{ request.url.netloc }}/api/weeks')
+response = requests.get('{{ base_url }}/api/weeks')
 data = response.json()
 print(f"Total weeks: {len(data['weeks'])}")
 
 # Get rankings for a specific week
-response = requests.get('{{ request.url.scheme }}://{{ request.url.netloc }}/api/week/2023-01-02')
+response = requests.get('{{ base_url }}/api/week/2023-01-02')
 data = response.json()
 print(f"Week: {data['week']}")
 print(f"Number 1: {data['rankings'][0]['name']}")
 
 # Get weeks at number 1 statistics
-response = requests.get('{{ request.url.scheme }}://{{ request.url.netloc }}/api/weeks-at-no1')
+response = requests.get('{{ base_url }}/api/weeks-at-no1')
 data = response.json()
 print(f"Total players who reached #1: {len(data)}")
 print(f"Most weeks at #1: {data[0]['player']} with {data[0]['weeks']} weeks")
 
 # Search for players
-response = requests.get('{{ request.url.scheme }}://{{ request.url.netloc }}/api/players/search', 
+response = requests.get('{{ base_url }}/api/players/search',
                         params={'q': 'federer', 'limit': 5})
 data = response.json()
 print(f"Found players: {data['players']}")
 
 # Get player factfile
-response = requests.get('{{ request.url.scheme }}://{{ request.url.netloc }}/api/player/factfile', 
+response = requests.get('{{ base_url }}/api/player/factfile',
                         params={'player': 'Roger Federer'})
 data = response.json()
 print(f"{data['player']}: Career High #{data['career_high_rank']}")
 print(f"Weeks at #1: {data['weeks_at_1']}")
 
 # Get player career data
-response = requests.get('{{ request.url.scheme }}://{{ request.url.netloc }}/api/player/career', 
+response = requests.get('{{ base_url }}/api/player/career',
                         params={'player': 'Rafael Nadal'})
 data = response.json()
 print(f"Career data points: {len(data['rankings'])} weeks")
-print(f"Best ranking: #{min(data['rankings'])}")</pre>
-            
-            <h3>cURL</h3>
-            <pre class="code-block"># Get all weeks
-curl {{ request.url.scheme }}://{{ request.url.netloc }}/api/weeks
+print(f"Best ranking: #{min(data['rankings'])}"){% endcall %}
+                    </div>
+
+                    <div role="tabpanel" id="panel-curl" aria-labelledby="tab-curl" hidden>
+                        <h3 class="code-tabs__panel-title">cURL</h3>
+                        {% call codeblock("bash") %}# Get all weeks
+curl {{ base_url }}/api/weeks
 
 # Get specific week
-curl {{ request.url.scheme }}://{{ request.url.netloc }}/api/week/2023-01-02
+curl {{ base_url }}/api/week/2023-01-02
 
 # Get weeks at number 1
-curl {{ request.url.scheme }}://{{ request.url.netloc }}/api/weeks-at-no1
+curl {{ base_url }}/api/weeks-at-no1
 
 # Search for players
-curl "{{ request.url.scheme }}://{{ request.url.netloc }}/api/players/search?q=federer&limit=5"
+curl "{{ base_url }}/api/players/search?q=federer&limit=5"
 
 # Get player factfile
-curl "{{ request.url.scheme }}://{{ request.url.netloc }}/api/player/factfile?player=Roger%20Federer"
+curl "{{ base_url }}/api/player/factfile?player=Roger%20Federer"
 
 # Get player career data
-curl "{{ request.url.scheme }}://{{ request.url.netloc }}/api/player/career?player=Rafael%20Nadal"</pre>
-        </div>
-        
-        <!-- Response Format Section -->
-        <div class="section">
-            <h2>Response Format</h2>
-            
-            <h3>Content Type</h3>
-            <p class="description">All responses are returned in JSON format with <code>Content-Type: application/json</code></p>
-            
-            <h3>Status Codes</h3>
-            <ul class="example-list">
-                <li><strong>200 OK</strong> - Request successful</li>
-                <li><strong>404 Not Found</strong> - Week not found in database</li>
-                <li><strong>500 Internal Server Error</strong> - Server error occurred</li>
-            </ul>
-            
-            <h3>Data Structure</h3>
-            <p class="description">
-                <strong>Week Data Object:</strong>
-            </p>
-            <pre class="code-block">{
+curl "{{ base_url }}/api/player/career?player=Rafael%20Nadal"{% endcall %}
+                    </div>
+                </div>
+            </section>
+
+            <!-- Response Format -->
+            <section class="docs-section" id="response-format">
+                <h2>Response Format</h2>
+
+                <h3>Content Type</h3>
+                <p class="prose">All responses are returned in JSON format with <code>Content-Type: application/json</code></p>
+
+                <h3>Status Codes</h3>
+                <div class="param-table">
+                    <table class="data-table">
+                        <thead><tr><th scope="col">Status</th><th scope="col">Meaning</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>200 OK</strong></td><td>Request successful</td></tr>
+                            <tr><td><strong>404 Not Found</strong></td><td>Week not found in database</td></tr>
+                            <tr><td><strong>500 Internal Server Error</strong></td><td>Server error occurred</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>Data Structure</h3>
+                <p class="prose" style="margin-bottom: 10px;"><strong>Week Data Object:</strong></p>
+                {% call codeblock("javascript") %}{
   "rank": "string",     // Player's ranking position (e.g., "1", "2", "3")
   "name": "string",     // Player's full name
   "points": "string"    // Points with comma separators or "-" if not available
-}</pre>
-        </div>
-        
-        <!-- Best Practices Section -->
-        <div class="section">
-            <h2> Best Practices</h2>
-            
-            <ul class="example-list">
-                <li><strong>Caching:</strong> Consider caching responses as historical data rarely changes</li>
-                <li><strong>Error Handling:</strong> Always check for 404 errors when requesting specific weeks</li>
-                <li><strong>Date Format:</strong> Use YYYY-MM-DD format for week dates (e.g., "2023-01-02")</li>
-                <li><strong>Pagination:</strong> The API returns complete datasets - implement client-side pagination if needed</li>
-                <li><strong>Rate Limiting:</strong> While there's no enforced rate limit, please be respectful with request frequency</li>
-            </ul>
-        </div>
-        
-        <!-- Support Section -->
-        <div class="section">
-            <h2> MCP Server (AI Integration)</h2>
+}{% endcall %}
+            </section>
 
-            <p class="description">
-                This API also includes a real <strong>Model Context Protocol (MCP)</strong> server, implemented with the
-                official MCP Python SDK, speaking JSON-RPC 2.0 over the Streamable HTTP transport. It exposes the same
-                underlying data through proper MCP tools, and can be added directly as a custom connector in Claude.ai
-                or any other MCP-compatible client.
-            </p>
+            <!-- Best Practices -->
+            <section class="docs-section" id="best-practices">
+                <h2>Best Practices</h2>
+                <ul class="def-list">
+                    <li><strong>Caching:</strong> Consider caching responses as historical data rarely changes</li>
+                    <li><strong>Error Handling:</strong> Always check for 404 errors when requesting specific weeks</li>
+                    <li><strong>Date Format:</strong> Use YYYY-MM-DD format for week dates (e.g., "2023-01-02")</li>
+                    <li><strong>Pagination:</strong> The API returns complete datasets - implement client-side pagination if needed</li>
+                    <li><strong>Rate Limiting:</strong> While there's no enforced rate limit, please be respectful with request frequency</li>
+                </ul>
+            </section>
 
-            <h3>MCP Endpoint</h3>
-            <ul class="example-list">
-                <li><strong>Single endpoint:</strong> <code>POST /mcp</code> (Streamable HTTP transport &mdash; <code>initialize</code>, <code>tools/list</code>, <code>tools/call</code>)</li>
-            </ul>
+            <!-- MCP Server -->
+            <section class="docs-section" id="mcp-server">
+                <h2>MCP Server (AI Integration)</h2>
 
-            <h3>Available Tools</h3>
-            <ul class="example-list">
-                <li><strong>search_players</strong>(query, limit)</li>
-                <li><strong>get_player_factfile</strong>(player)</li>
-                <li><strong>get_player_career</strong>(player)</li>
-                <li><strong>get_weeks_at_no1</strong>()</li>
-                <li><strong>get_all_weeks</strong>()</li>
-                <li><strong>get_week_rankings</strong>(week_date)</li>
-            </ul>
+                <p class="prose">
+                    This API also includes a real <strong>Model Context Protocol (MCP)</strong> server, implemented with the
+                    official MCP Python SDK, speaking JSON-RPC 2.0 over the Streamable HTTP transport. It exposes the same
+                    underlying data through proper MCP tools, and can be added directly as a custom connector in Claude.ai
+                    or any other MCP-compatible client.
+                </p>
 
-            <p class="description">
-                A legacy set of REST-style endpoints under <code>/mcp/*</code> (e.g. <code>GET /mcp/health</code>,
-                <code>POST /mcp/tools/search_players</code>) remains available for backwards compatibility, but is not
-                a real MCP server and will not work with Claude.ai's custom connector flow &mdash; use the
-                <code>/mcp</code> endpoint above instead.
-            </p>
+                <h3>MCP Endpoint</h3>
+                <ul class="def-list">
+                    <li><strong>Single endpoint:</strong> <code>POST /mcp</code> (Streamable HTTP transport &mdash; <code>initialize</code>, <code>tools/list</code>, <code>tools/call</code>)</li>
+                </ul>
 
-            <p class="description">
-                For complete MCP documentation, see the
-                <a href="https://github.com/Jupiterian/ATP-Rankings-Data-Visualization/blob/main/MCP_README.md" target="_blank" style="color: #667eea;">
-                    MCP_README.md
-                </a> file.
-            </p>
-        </div>
-        
-        <!-- Support Section -->
-        <div class="section">
-            <h2> Support</h2>
-            
-            <p class="description">
-                For issues, questions, or feature requests, please visit the 
-                <a href="https://github.com/Jupiterian/ATP-Rankings-Data-Visualization" target="_blank" style="color: #667eea;">
-                    GitHub repository
-                </a>.
-            </p>
-            
-            <div class="info-box">
-                <strong>Note:</strong> This is a free, public API provided as-is. No SLA or uptime guarantees are provided.
-            </div>
+                <h3>Available Tools</h3>
+                <ul class="def-list">
+                    <li><code>search_players(query, limit)</code></li>
+                    <li><code>get_player_factfile(player)</code></li>
+                    <li><code>get_player_career(player)</code></li>
+                    <li><code>get_weeks_at_no1()</code></li>
+                    <li><code>get_all_weeks()</code></li>
+                    <li><code>get_week_rankings(week_date)</code></li>
+                </ul>
+
+                <div class="callout" style="margin-top: 20px;">
+                    {{ icon("info") }}
+                    <span>
+                        A legacy set of REST-style endpoints under <code>/mcp/*</code> (e.g. <code>GET /mcp/health</code>,
+                        <code>POST /mcp/tools/search_players</code>) remains available for backwards compatibility, but is not
+                        a real MCP server and will not work with Claude.ai's custom connector flow &mdash; use the
+                        <code>/mcp</code> endpoint above instead.
+                    </span>
+                </div>
+
+                <p class="prose" style="margin-top: 16px;">
+                    For complete MCP documentation, see the
+                    <a href="https://github.com/Jupiterian/ATP-Rankings-API/blob/main/docs/MCP_README.md" target="_blank" rel="noopener">MCP_README.md</a> file.
+                </p>
+            </section>
+
+            <!-- Support -->
+            <section class="docs-section" id="support">
+                <h2>Support</h2>
+
+                <p class="prose">
+                    For issues, questions, or feature requests, please visit the
+                    <a href="https://github.com/Jupiterian/ATP-Rankings-API" target="_blank" rel="noopener">GitHub repository</a>.
+                </p>
+
+                <div class="callout" style="margin-top: 16px;">
+                    {{ icon("info") }}
+                    <span><strong>Note:</strong> This is a free, public API provided as-is. No SLA or uptime guarantees are provided.</span>
+                </div>
+            </section>
         </div>
     </div>
-    <script src="{{ url_for('static', path='js/theme-toggle.js') }}"></script>
-</body>
-</html>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    (function () {
+        // Copy buttons on every code block and the base URL.
+        function addCopyButton(container, getText) {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'code-block__copy';
+            button.textContent = 'Copy';
+            button.addEventListener('click', async () => {
+                try {
+                    await navigator.clipboard.writeText(getText());
+                    button.textContent = 'Copied';
+                } catch (error) {
+                    button.textContent = 'Press Ctrl+C';
+                    const range = document.createRange();
+                    range.selectNodeContents(container.querySelector('code'));
+                    const selection = window.getSelection();
+                    selection.removeAllRanges();
+                    selection.addRange(range);
+                }
+                button.classList.add('is-copied');
+                setTimeout(() => {
+                    button.textContent = 'Copy';
+                    button.classList.remove('is-copied');
+                }, 1600);
+            });
+            container.append(button);
+            return button;
+        }
+
+        document.querySelectorAll('.code-block').forEach(block => {
+            const code = block.querySelector('code');
+            addCopyButton(block, () => code.textContent);
+        });
+
+        const baseUrl = document.querySelector('.base-url');
+        if (baseUrl) {
+            const button = addCopyButton(baseUrl, () => baseUrl.querySelector('code').textContent);
+            button.classList.remove('code-block__copy');
+            button.className = 'btn btn--secondary btn--sm';
+        }
+
+        // Tabs for the usage examples.
+        document.querySelectorAll('[data-tabs]').forEach(group => {
+            const tabs = Array.from(group.querySelectorAll('[role="tab"]'));
+            function select(tab) {
+                tabs.forEach(t => {
+                    const selected = t === tab;
+                    t.setAttribute('aria-selected', String(selected));
+                    t.tabIndex = selected ? 0 : -1;
+                    document.getElementById(t.getAttribute('aria-controls')).hidden = !selected;
+                });
+            }
+            tabs.forEach((tab, i) => {
+                tab.addEventListener('click', () => select(tab));
+                tab.addEventListener('keydown', event => {
+                    if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+                    const next = tabs[(i + (event.key === 'ArrowRight' ? 1 : tabs.length - 1)) % tabs.length];
+                    next.focus();
+                    select(next);
+                });
+            });
+        });
+
+        // Highlight the table-of-contents entry for the section in view.
+        const tocLinks = Array.from(document.querySelectorAll('.docs-toc a'));
+        const targets = tocLinks
+            .map(link => document.getElementById(link.getAttribute('href').slice(1)))
+            .filter(Boolean);
+        if ('IntersectionObserver' in window && targets.length) {
+            const visible = new Set();
+            const observer = new IntersectionObserver(entries => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) visible.add(entry.target.id);
+                    else visible.delete(entry.target.id);
+                });
+                // The innermost (most specific) visible target wins.
+                const current = targets.filter(t => visible.has(t.id)).pop();
+                if (!current) return;
+                tocLinks.forEach(link => link.classList.toggle('is-active', link.getAttribute('href') === '#' + current.id));
+            }, { rootMargin: '-80px 0px -65% 0px' });
+            targets.forEach(target => observer.observe(target));
+        }
+
+        // Syntax highlighting (highlight.js loads deferred).
+        window.addEventListener('DOMContentLoaded', () => {
+            if (window.hljs) {
+                hljs.configure({ ignoreUnescapedHTML: true });
+                document.querySelectorAll('.code-block code').forEach(code => hljs.highlightElement(code));
+            }
+        });
+    })();
+</script>
+{% endblock %}

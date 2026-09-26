@@ -1,223 +1,109 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Weeks at No. 1 - ATP Rankings</title>
-    <link rel="stylesheet" href="{{ url_for('static', path='css/theme.css') }}">
-    <style>
-        body {
-            background: var(--color-bg);
-            background-image: var(--color-bg-gradient);
-            min-height: 100vh;
-        }
+{% extends "base.html" %}
+{% set active_page = "no1" %}
 
-        .container {
-            width: min(1400px, 100% - 32px);
-            margin: 0 auto;
-            padding: clamp(1.5rem, 3vw, 3rem) 0 4rem;
-        }
+{% block title %}Weeks at No. 1 - ATP Rankings{% endblock %}
 
-        header {
-            text-align: center;
-            margin-bottom: 2rem;
-            color: var(--color-text);
-        }
-
-        header h1 {
-            margin-bottom: 0.4rem;
-        }
-
-        header p {
-            margin: 0;
-            color: var(--color-muted);
-        }
-
-        .nav-buttons {
-            display: flex;
-            gap: 0.75rem;
-            justify-content: center;
-            flex-wrap: wrap;
-            margin-bottom: 1.5rem;
-        }
-
-        .nav-button {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.4rem;
-            padding: 0.75rem 1.5rem;
-            border-radius: var(--radius-pill);
-            background: rgba(37, 99, 235, 0.08);
-            border: 1px solid rgba(37, 99, 235, 0.2);
-            color: var(--color-primary);
-            font-weight: 600;
-            text-decoration: none;
-        }
-
-        .nav-button:hover {
-            transform: translateY(-1px);
-            box-shadow: var(--shadow-soft);
-        }
-
-        .controls,
-        .chart-container {
-            background: var(--color-surface);
-            border-radius: var(--radius-xl);
-            padding: clamp(1.25rem, 2vw, 2.5rem);
-            box-shadow: var(--shadow-md);
-            border: 1px solid rgba(226, 232, 240, 0.7);
-            margin-bottom: 2rem;
-        }
-
-        .control-group {
-            display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
-            align-items: center;
-        }
-
-        .control-group label {
-            font-weight: 600;
-            color: var(--color-muted);
-        }
-
-        .control-group input,
-        .control-group select {
-            border-radius: var(--radius-md);
-            border: 1.5px solid var(--color-border);
-            padding: 0.65rem 0.9rem;
-            min-width: 120px;
-        }
-
-        .controls button {
-            border: none;
-            border-radius: var(--radius-pill);
-            padding: 0.7rem 1.6rem;
-            font-weight: 600;
-            background: var(--color-primary);
-            color: white;
-            cursor: pointer;
-            box-shadow: 0 12px 30px rgba(37, 99, 235, 0.25);
-        }
-
-        .stats-summary {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 1rem;
-            margin-bottom: 1.25rem;
-        }
-
-        .stat-card {
-            background: var(--color-surface-soft);
-            border-radius: var(--radius-lg);
-            padding: 1.25rem;
-            border: 1px solid rgba(226, 232, 240, 0.8);
-            text-align: center;
-        }
-
-        .stat-card .value {
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--color-primary);
-        }
-
-        .stat-card .label {
-            color: var(--color-muted);
-            font-size: 0.95rem;
-        }
-
-        .chart-wrapper {
-            position: relative;
-            min-height: 600px;
-        }
-
-        .loading {
-            text-align: center;
-            color: var(--color-muted);
-            padding: 2.5rem 1rem;
-        }
-
-        @media (max-width: 768px) {
-            .chart-wrapper {
-                min-height: 420px;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="page-shell">
-        <header class="section-heading" style="text-align: center;">
-            <h1> Weeks at Number 1</h1>
-            <p>Explore the full history of ATP players who held the top spot and how long they dominated.</p>
-        </header>
-
-        <div class="button-row" style="justify-content: center;">
-            <a href="/" class="btn">← Home</a>
-            <a href="/compare" class="btn btn--secondary">Player Comparison</a>
-            <a href="/api-docs" class="btn btn--ghost">API Docs</a>
+{% block content %}
+<div class="container page">
+    <header class="page-header">
+        <div class="page-header__text">
+            <h1>Weeks at Number 1</h1>
+            <p class="lead">Explore the full history of ATP players who held the top spot and how long they dominated.</p>
         </div>
+    </header>
 
-        <div class="subtle-card controls">
-            <div class="section-heading" style="margin-bottom: 1rem;">
-                <h2 style="font-size: 1.35rem;">Filter the leaderboard</h2>
+    <div class="stack">
+        <form class="card filter-bar" id="filterForm">
+            <div class="filter-bar__intro">
+                <h2>Filter the leaderboard</h2>
                 <p>Focus on a specific slice by minimum weeks or limit the leaderboard size.</p>
             </div>
-            <div class="control-group">
+            <div class="field">
                 <label for="minWeeks">Minimum Weeks</label>
-                <input type="number" id="minWeeks" value="1" min="1" max="500">
-                
+                <input class="input" type="number" id="minWeeks" value="1" min="1" max="500" inputmode="numeric">
+            </div>
+            <div class="field">
                 <label for="topN">Show Top</label>
-                <select id="topN">
+                <select class="select" id="topN">
                     <option value="10">Top 10</option>
                     <option value="20" selected>Top 20</option>
                     <option value="30">Top 30</option>
                     <option value="50">Top 50</option>
                     <option value="all">All Players</option>
                 </select>
-                
-                <button onclick="updateChart()" class="btn btn--primary">Update Chart</button>
             </div>
-        </div>
+            <button type="submit" class="btn btn--primary">Update Chart</button>
+        </form>
 
-        <div id="statsContainer" style="display: none;">
-            <div class="stats-summary">
-                <div class="stat-card">
-                    <div class="value" id="totalPlayers">-</div>
-                    <div class="label">Total Players</div>
-                </div>
-                <div class="stat-card">
-                    <div class="value" id="totalWeeks">-</div>
-                    <div class="label">Total Weeks</div>
-                </div>
-                <div class="stat-card">
-                    <div class="value" id="topPlayer">-</div>
-                    <div class="label">Most Weeks</div>
-                </div>
-                <div class="stat-card">
-                    <div class="value" id="topWeeks">-</div>
-                    <div class="label">Record</div>
-                </div>
+        <dl class="stats no1-stats" id="statsContainer" aria-live="polite">
+            <div class="stat">
+                <dt>Total Players</dt>
+                <dd id="totalPlayers">–</dd>
             </div>
-        </div>
+            <div class="stat">
+                <dt>Total Weeks</dt>
+                <dd id="totalWeeks">–</dd>
+            </div>
+            <div class="stat">
+                <dt>Most Weeks</dt>
+                <dd id="topPlayer">–</dd>
+            </div>
+            <div class="stat">
+                <dt>Record</dt>
+                <dd id="topWeeks">–</dd>
+            </div>
+        </dl>
 
-        <div class="surface-card chart-container">
-            <div class="section-heading" style="margin-bottom: 1rem;">
-                <h2 style="margin-bottom: 0.2rem;">Weeks at World Number 1</h2>
-                <p>Each bar highlights how long a player held the top ranking. Hover to see exact totals.</p>
+        <section class="card" aria-labelledby="chart-title">
+            <div class="card__header">
+                <div>
+                    <h2 id="chart-title">Weeks at World Number 1</h2>
+                    <p>Each bar highlights how long a player held the top ranking. Hover to see exact totals.</p>
+                </div>
             </div>
-            <div id="loading" class="loading">Loading data</div>
-            <div class="chart-wrapper" id="chartWrapper" style="display: none;">
-                <canvas id="weeksChart"></canvas>
+            <div class="card__body">
+                <div id="loading" class="loading-line"><span class="spinner"></span>Loading data</div>
+                <p id="chartEmpty" class="empty-state" hidden>No players match these filters.</p>
+                <div class="bar-chart-box" id="chartWrapper" hidden>
+                    <canvas id="weeksChart" role="img" aria-label="Horizontal bar chart of weeks spent at world number 1 by player"></canvas>
+                </div>
             </div>
-        </div>
+        </section>
     </div>
+</div>
+{% endblock %}
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
-    <script>
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+<script src="{{ url_for('static', path='js/charts.js') }}"></script>
+<script>
+    (function () {
+        const ROW_HEIGHT = 30;
         let allData = [];
         let chart = null;
 
-        // Fetch data on page load
+        const loading = document.getElementById('loading');
+        const chartWrapper = document.getElementById('chartWrapper');
+        const chartEmpty = document.getElementById('chartEmpty');
+
+        // Value at the tip of each bar, in text ink (never the series color).
+        const valueLabels = {
+            id: 'valueLabels',
+            afterDatasetsDraw(chart) {
+                const { ctx } = chart;
+                const values = chart.data.datasets[0].data;
+                ctx.save();
+                ctx.font = '600 12px ' + ChartTheme.token('--font-sans');
+                ctx.fillStyle = ChartTheme.token('--text-2');
+                ctx.textAlign = 'left';
+                ctx.textBaseline = 'middle';
+                chart.getDatasetMeta(0).data.forEach((bar, i) => {
+                    ctx.fillText(values[i].toLocaleString('en-US'), bar.x + 8, bar.y);
+                });
+                ctx.restore();
+            }
+        };
+
         async function fetchWeeksAtNo1Data() {
             try {
                 const response = await fetch('/api/weeks-at-no1');
@@ -225,136 +111,108 @@
                     throw new Error('Failed to fetch data');
                 }
                 allData = await response.json();
-                
-                // Sort by weeks descending
                 allData.sort((a, b) => b.weeks - a.weeks);
-                
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('chartWrapper').style.display = 'block';
-                document.getElementById('statsContainer').style.display = 'block';
-                
+                loading.hidden = true;
                 updateChart();
             } catch (error) {
-                document.getElementById('loading').textContent = 'Error loading data: ' + error.message;
+                loading.replaceChildren(document.createTextNode('Error loading data: ' + error.message));
                 console.error('Error:', error);
             }
         }
 
-        function updateChart() {
-            const minWeeks = parseInt(document.getElementById('minWeeks').value) || 1;
+        function filteredData() {
+            const minWeeks = parseInt(document.getElementById('minWeeks').value, 10) || 1;
             const topN = document.getElementById('topN').value;
-            
-            // Filter data
-            let filteredData = allData.filter(p => p.weeks >= minWeeks);
-            
-            // Limit to top N if specified
-            if (topN !== 'all') {
-                filteredData = filteredData.slice(0, parseInt(topN));
-            }
-            
-            // Update stats
-            document.getElementById('totalPlayers').textContent = filteredData.length;
-            document.getElementById('totalWeeks').textContent = filteredData.reduce((sum, p) => sum + p.weeks, 0);
-            if (filteredData.length > 0) {
-                document.getElementById('topPlayer').textContent = filteredData[0].player;
-                document.getElementById('topWeeks').textContent = filteredData[0].weeks;
-            }
-            
-            // Prepare chart data
-            const labels = filteredData.map(p => p.player);
-            const data = filteredData.map(p => p.weeks);
-            
-            // Set dynamic height based on number of players (30px per player, minimum 600px)
-            const chartHeight = Math.max(600, filteredData.length * 30);
-            document.getElementById('chartWrapper').style.height = chartHeight + 'px';
-            
-            // Generate colors (gradient from purple to blue)
-            const colors = filteredData.map((_, index) => {
-                const ratio = index / Math.max(filteredData.length - 1, 1);
-                const r = Math.floor(102 + (118 - 102) * ratio);
-                const g = Math.floor(126 + (74 - 126) * ratio);
-                const b = Math.floor(234 + (162 - 234) * ratio);
-                return `rgb(${r}, ${g}, ${b})`;
-            });
-            
-            // Create or update chart
-            const ctx = document.getElementById('weeksChart').getContext('2d');
-            
+            let data = allData.filter(p => p.weeks >= minWeeks);
+            if (topN !== 'all') data = data.slice(0, parseInt(topN, 10));
+            return data;
+        }
+
+        function updateStats(data) {
+            document.getElementById('totalPlayers').textContent = data.length.toLocaleString('en-US');
+            document.getElementById('totalWeeks').textContent = data.reduce((sum, p) => sum + p.weeks, 0).toLocaleString('en-US');
+            document.getElementById('topPlayer').textContent = data.length ? data[0].player : '–';
+            document.getElementById('topWeeks').textContent = data.length ? data[0].weeks.toLocaleString('en-US') : '–';
+        }
+
+        function updateChart() {
+            if (!allData.length) return;
+            const data = filteredData();
+            updateStats(data);
+
             if (chart) {
                 chart.destroy();
+                chart = null;
             }
-            
-            chart = new Chart(ctx, {
+            chartEmpty.hidden = data.length > 0;
+            chartWrapper.hidden = data.length === 0;
+            if (!data.length) return;
+
+            // Height follows the number of bars (plus the axis band) so the
+            // chart never scrolls inside its card.
+            chartWrapper.style.height = (data.length * ROW_HEIGHT + 64) + 'px';
+            // On phones every pixel goes to the bars; the names already label the axis.
+            const narrow = chartWrapper.clientWidth < 520;
+
+            chart = new Chart(document.getElementById('weeksChart'), {
                 type: 'bar',
                 data: {
-                    labels: labels,
+                    labels: data.map(p => p.player),
                     datasets: [{
                         label: 'Weeks at No. 1',
-                        data: data,
-                        backgroundColor: colors,
-                        borderColor: colors.map(c => c.replace(')', ', 0.8)').replace('rgb', 'rgba')),
-                        borderWidth: 2,
-                        borderRadius: 4
+                        data: data.map(p => p.weeks),
+                        backgroundColor: ChartTheme.series(0),
+                        hoverBackgroundColor: ChartTheme.token('--accent-text'),
+                        borderRadius: 4,
+                        borderSkipped: 'start',
+                        maxBarThickness: 20,
+                        categoryPercentage: 0.8,
+                        barPercentage: 0.9
                     }]
                 },
                 options: {
                     indexAxis: 'y',
                     responsive: true,
                     maintainAspectRatio: false,
+                    layout: { padding: { right: narrow ? 36 : 48 } },
                     plugins: {
-                        legend: {
-                            display: false
-                        },
+                        legend: { display: false },
                         tooltip: {
+                            displayColors: false,
                             callbacks: {
-                                label: function(context) {
-                                    return context.parsed.x + ' weeks at #1';
-                                }
+                                label: context => context.parsed.x + ' weeks at #1'
                             }
-                        },
-                        title: {
-                            display: false
                         }
                     },
                     scales: {
-                        x: {
+                        x: ChartTheme.scale({
+                            position: 'top',
                             beginAtZero: true,
-                            title: {
-                                display: true,
-                                text: 'Weeks at Number 1',
-                                font: {
-                                    size: 14,
-                                    weight: 'bold'
-                                }
-                            },
-                            ticks: {
-                                precision: 0
-                            }
-                        },
-                        y: {
-                            title: {
-                                display: true,
-                                text: 'Player',
-                                font: {
-                                    size: 14,
-                                    weight: 'bold'
-                                }
-                            },
+                            ticks: { precision: 0 },
+                            title: { display: true, text: 'Weeks at Number 1' }
+                        }),
+                        y: ChartTheme.scale({
+                            grid: { display: false },
                             ticks: {
                                 autoSkip: false,
-                                font: {
-                                    size: 11
-                                }
-                            }
-                        }
+                                color: ChartTheme.token('--text-2'),
+                                font: { size: 12.5, weight: '500' }
+                            },
+                            title: { display: !narrow, text: 'Player' }
+                        })
                     }
-                }
+                },
+                plugins: [valueLabels]
             });
         }
 
-        // Load data on page load
+        document.getElementById('filterForm').addEventListener('submit', event => {
+            event.preventDefault();
+            updateChart();
+        });
+
+        ChartTheme.onChange(updateChart);
         fetchWeeksAtNo1Data();
-    </script>
-    <script src="{{ url_for('static', path='js/theme-toggle.js') }}"></script>
-</body>
-</html>
+    })();
+</script>
+{% endblock %}

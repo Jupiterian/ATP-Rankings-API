@@ -1,46 +1,49 @@
-// Theme Toggle Functionality
-(function() {
-  // Get saved theme from localStorage or default to 'dark'
-  const savedTheme = localStorage.getItem('theme') || 'dark';
-  
-  // Apply theme on page load
-  document.documentElement.setAttribute('data-theme', savedTheme);
-  
-  // Function to toggle theme
-  function toggleTheme() {
-    const currentTheme = document.documentElement.getAttribute('data-theme');
-    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-    
-    document.documentElement.setAttribute('data-theme', newTheme);
-    localStorage.setItem('theme', newTheme);
-    
-    // Update button icon
-    updateToggleIcon(newTheme);
+// Theme toggle. The initial theme is applied by an inline script in
+// base.html before first paint; this wires up the header button, follows OS
+// changes until the user picks a theme, and emits a `themechange` event so
+// charts can re-read the color tokens.
+(function () {
+  var root = document.documentElement;
+  var button = document.getElementById('themeToggle');
+  var media = window.matchMedia ? window.matchMedia('(prefers-color-scheme: light)') : null;
+
+  function savedTheme() {
+    try { return localStorage.getItem('theme'); } catch (e) { return null; }
   }
-  
-  // Function to update toggle button icon
-  function updateToggleIcon(theme) {
-    const toggleBtn = document.getElementById('themeToggle');
-    if (toggleBtn) {
-      toggleBtn.textContent = theme === 'dark' ? '☀️' : '🌙';
-      toggleBtn.setAttribute('aria-label', `Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`);
-    }
+
+  function currentTheme() {
+    return root.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
   }
-  
-  // Initialize when DOM is ready
-  document.addEventListener('DOMContentLoaded', function() {
-    // Create toggle button if it doesn't exist
-    if (!document.getElementById('themeToggle')) {
-      const toggleBtn = document.createElement('button');
-      toggleBtn.id = 'themeToggle';
-      toggleBtn.className = 'theme-toggle';
-      toggleBtn.setAttribute('aria-label', `Switch to ${savedTheme === 'dark' ? 'light' : 'dark'} mode`);
-      toggleBtn.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
-      toggleBtn.onclick = toggleTheme;
-      document.body.appendChild(toggleBtn);
+
+  function updateButton() {
+    if (!button) return;
+    var next = currentTheme() === 'dark' ? 'light' : 'dark';
+    button.setAttribute('aria-label', 'Switch to ' + next + ' mode');
+    button.title = 'Switch to ' + next + ' mode';
+  }
+
+  function applyTheme(theme, persist) {
+    root.setAttribute('data-theme', theme);
+    if (persist) {
+      try { localStorage.setItem('theme', theme); } catch (e) {}
     }
-    
-    // Update icon on load
-    updateToggleIcon(savedTheme);
-  });
+    updateButton();
+    document.dispatchEvent(new CustomEvent('themechange', { detail: { theme: theme } }));
+  }
+
+  if (button) {
+    updateButton();
+    button.addEventListener('click', function () {
+      applyTheme(currentTheme() === 'dark' ? 'light' : 'dark', true);
+    });
+  }
+
+  if (media && media.addEventListener) {
+    media.addEventListener('change', function (event) {
+      var saved = savedTheme();
+      if (saved !== 'light' && saved !== 'dark') {
+        applyTheme(event.matches ? 'light' : 'dark', false);
+      }
+    });
+  }
 })();

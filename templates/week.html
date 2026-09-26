@@ -1,182 +1,126 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ATP Rankings - {{ week_date }}</title>
-    <link rel="stylesheet" href="{{ url_for('static', path='css/theme.css') }}">
-    <style>
-        .week-hero {
-            text-align: center;
-            margin-bottom: 1.5rem;
-        }
+{% extends "base.html" %}
+{% from "_icons.html" import icon %}
+{% set active_page = "rankings" %}
 
-        .week-hero h1 {
-            margin-bottom: 0.4rem;
-        }
+{% block title %}ATP Rankings - {{ week_date }}{% endblock %}
 
-        .week-hero p {
-            margin: 0;
-            color: var(--color-muted);
-        }
-
-        .nav-row {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.8rem;
-            justify-content: space-between;
-            align-items: center;
-            margin: 1.5rem 0;
-        }
-
-        .nav-row .spacer {
-            flex: 1;
-        }
-
-        .nav-row .btn {
-            flex: 1;
-            min-width: 180px;
-            justify-content: center;
-        }
-
-        .btn.is-disabled {
-            color: var(--color-muted);
-            border-color: rgba(15, 23, 42, 0.08);
-            background: rgba(15, 23, 42, 0.04);
-            cursor: not-allowed;
-            box-shadow: none;
-        }
-
-        .search-panel {
-            margin-bottom: 1.5rem;
-        }
-
-        .rank-table .rank-col {
-            font-weight: 700;
-            color: var(--color-primary);
-            width: 80px;
-        }
-
-        .rank-table .points-col {
-            color: var(--color-muted);
-        }
-
-        .rank-row--top {
-            background: linear-gradient(90deg, rgba(37, 99, 235, 0.04), transparent);
-        }
-
-        .rank-row--top:nth-child(1) .rank-col { color: #f5b000; }
-        .rank-row--top:nth-child(2) .rank-col { color: #a1a1aa; }
-        .rank-row--top:nth-child(3) .rank-col { color: #d97706; }
-
-        .hint-text {
-            font-size: 0.9rem;
-            color: var(--color-muted);
-            margin-top: 0.35rem;
-        }
-    </style>
-</head>
-<body>
-    <div class="page-shell">
-        <section class="surface-card">
-            <div class="week-hero">
-                <div class="chip">Weekly snapshot</div>
-                <h1> ATP Rankings</h1>
-                <p>{{ week_date }}</p>
+{% block content %}
+<div class="container page">
+    <header class="page-header">
+        <div class="page-header__text">
+            <span class="eyebrow">Weekly snapshot</span>
+            <h1 class="week-title">ATP Rankings <span class="week-title__date">{{ week_date }}</span></h1>
+            <div class="week-meta">
+                <span><strong>{{ rankings|length }}</strong> Players ranked this week</span>
             </div>
+        </div>
 
-            <div class="nav-row">
-                {% if prev_week %}
-                <a href="/week/{{ prev_week }}" class="btn btn--ghost">← {{ prev_week }}</a>
-                {% else %}
-                <span class="btn btn--ghost is-disabled">← First week</span>
-                {% endif %}
+        <nav class="week-nav" aria-label="Week navigation">
+            {% if prev_week %}
+            <a href="/week/{{ prev_week }}" class="btn btn--secondary" id="prevWeek" rel="prev" title="Previous week">{{ icon("chevron-left") }}{{ prev_week }}</a>
+            {% else %}
+            <span class="btn btn--secondary is-disabled" aria-disabled="true">{{ icon("chevron-left") }}First week</span>
+            {% endif %}
 
-                <a href="/" class="btn btn--primary"> Back to archive</a>
+            <a href="/#y{{ week_date[:4] }}" class="btn btn--secondary">Back to archive</a>
 
-                {% if next_week %}
-                <a href="/week/{{ next_week }}" class="btn btn--ghost">{{ next_week }} →</a>
-                {% else %}
-                <span class="btn btn--ghost is-disabled">Latest week →</span>
-                {% endif %}
-            </div>
+            {% if next_week %}
+            <a href="/week/{{ next_week }}" class="btn btn--secondary" id="nextWeek" rel="next" title="Next week">{{ next_week }}{{ icon("chevron-right") }}</a>
+            {% else %}
+            <span class="btn btn--secondary is-disabled" aria-disabled="true">Latest week{{ icon("chevron-right") }}</span>
+            {% endif %}
+        </nav>
+    </header>
 
-            <div class="subtle-card search-panel">
-                <label class="input-control" for="searchInput">
-                    <input type="text" id="searchInput" placeholder="Quickly filter players...">
+    <div class="card">
+        <div class="table-toolbar">
+            <div class="table-toolbar__search">
+                <label class="search-field">
+                    <span class="visually-hidden">Filter players</span>
+                    {{ icon("search", "search-field__icon") }}
+                    <input type="search" id="searchInput" class="input" placeholder="Quickly filter players..." autocomplete="off" spellcheck="false">
+                    <kbd class="search-field__kbd" aria-hidden="true">/</kbd>
                 </label>
-                <p class="hint-text">Highlight the player you're after without leaving the keyboard.</p>
+                <p class="field-hint">Highlight the player you're after without leaving the keyboard.</p>
             </div>
+            <span class="kbd-hint">Use arrows <kbd>←</kbd><kbd>→</kbd> to navigate weeks</span>
+        </div>
 
-            <div class="table-wrapper">
-                <table class="table rank-table" id="rankingsTable">
-                    <thead>
-                        <tr>
-                            <th>Rank</th>
-                            <th>Player</th>
-                            <th>Points</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for player in rankings %}
-                        <tr class="rank-row {% if player.rank|int <= 3 %}rank-row--top{% endif %}" data-player="{{ player.name|lower }}">
-                            <td class="rank-col">{{ player.rank }}</td>
-                            <td>{{ player.name }}</td>
-                            <td class="points-col">{{ player.points }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-
-            <div class="stat-grid" style="margin-top: 1.5rem;">
-                <div class="stat-card">
-                    <div class="stat-card__value">{{ rankings|length }}</div>
-                    <div class="stat-card__label">Players ranked this week</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-card__value">Use arrows</div>
-                    <div class="stat-card__label">Navigate weeks with ← and →</div>
-                </div>
-            </div>
-        </section>
+        <table class="data-table rank-table" id="rankingsTable">
+            <thead>
+                <tr>
+                    <th scope="col" class="col-rank">Rank</th>
+                    <th scope="col">Player</th>
+                    <th scope="col" class="col-num">Points</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for player in rankings %}
+                {%- set rank_num = player.rank|string|replace("T", "")|int %}
+                <tr class="rank-row{% if rank_num in [1, 2, 3] %} rank-row--{{ rank_num }}{% endif %}" data-player="{{ player.name|lower }}">
+                    <td class="col-rank"><span class="rank-cell">{{ player.rank }}</span></td>
+                    <td class="col-player">{{ player.name }}</td>
+                    <td class="col-num">{% if player.points == "-" %}<span class="muted">–</span>{% else %}{{ player.points }}{% endif %}</td>
+                </tr>
+                {% endfor %}
+                <tr class="table-empty" id="noPlayers" hidden>
+                    <td colspan="3">No players match “<span id="noPlayersTerm"></span>” this week.</td>
+                </tr>
+            </tbody>
+        </table>
     </div>
-    
-    <script>
-        // Search functionality
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    (function () {
         const searchInput = document.getElementById('searchInput');
-    const tableRows = document.querySelectorAll('#rankingsTable tbody tr');
-        
-        searchInput.addEventListener('input', function(e) {
-            const searchTerm = e.target.value.toLowerCase();
-            
-            tableRows.forEach(row => {
-                const playerName = row.getAttribute('data-player');
-                if (playerName.includes(searchTerm)) {
-                    row.style.display = '';
-                } else {
-                    row.style.display = 'none';
-                }
+        const rows = Array.from(document.querySelectorAll('#rankingsTable tbody tr[data-player]'));
+        const noPlayers = document.getElementById('noPlayers');
+        const noPlayersTerm = document.getElementById('noPlayersTerm');
+        const prevLink = document.getElementById('prevWeek');
+        const nextLink = document.getElementById('nextWeek');
+
+        function filterRows() {
+            const term = searchInput.value.trim().toLowerCase();
+            let visible = 0;
+            rows.forEach(row => {
+                const match = row.dataset.player.includes(term);
+                row.hidden = !match;
+                if (match) visible++;
             });
-        });
-        
-        // Keyboard navigation
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'ArrowLeft') {
-                const prevBtn = document.querySelector('.nav-btn[href*="prev"]');
-                if (prevBtn && !prevBtn.classList.contains('disabled')) {
-                    window.location.href = prevBtn.href;
+            noPlayersTerm.textContent = searchInput.value.trim();
+            noPlayers.hidden = visible > 0;
+        }
+
+        searchInput.addEventListener('input', filterRows);
+
+        // Keyboard shortcuts: ← / → change week, h / Home returns to the
+        // archive, / focuses the filter. Ignored while typing in a field.
+        document.addEventListener('keydown', event => {
+            if (event.metaKey || event.ctrlKey || event.altKey) return;
+
+            if (event.target.closest('input, textarea, select, [contenteditable="true"]')) {
+                if (event.key === 'Escape' && event.target === searchInput) {
+                    searchInput.value = '';
+                    filterRows();
+                    searchInput.blur();
                 }
-            } else if (e.key === 'ArrowRight') {
-                const nextBtn = document.querySelector('.nav-btn[href*="next"]');
-                if (nextBtn && !nextBtn.classList.contains('disabled')) {
-                    window.location.href = nextBtn.href;
-                }
-            } else if (e.key === 'Home' || e.key === 'h') {
+                return;
+            }
+
+            if (event.key === 'ArrowLeft' && prevLink) {
+                window.location.href = prevLink.href;
+            } else if (event.key === 'ArrowRight' && nextLink) {
+                window.location.href = nextLink.href;
+            } else if (event.key === 'Home' || event.key === 'h') {
                 window.location.href = '/';
+            } else if (event.key === '/') {
+                event.preventDefault();
+                searchInput.focus();
             }
         });
-    </script>
-    <script src="{{ url_for('static', path='js/theme-toggle.js') }}"></script>
-</body>
-</html>
+    })();
+</script>
+{% endblock %}
