@@ -10,37 +10,46 @@ project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 db_path = os.path.join(project_root, 'rankings.db')
 
 conn = sqlite3.connect(db_path)
-ATP_SESSION = requests.Session(impersonate="chrome124")
+# Browser fingerprints Cloudflare currently lets through; tried in order until one works
+ATP_IMPERSONATIONS = ("chrome146", "chrome131", "safari184", "chrome124", "safari180", "firefox147", "chrome120")
+# Optional proxy (e.g. a residential proxy) for when the runner's IP is blocked outright
+ATP_PROXY = os.environ.get("ATP_PROXY") or None
+ATP_PROXIES = {"http": ATP_PROXY, "https": ATP_PROXY} if ATP_PROXY else None
+ATP_SESSIONS = {}
 ATP_SCRAPER = cloudscraper.create_scraper(
     browser={"browser": "chrome", "platform": "windows", "mobile": False}
 )
 
 
+def get_atp_session(impersonation):
+    if impersonation not in ATP_SESSIONS:
+        ATP_SESSIONS[impersonation] = requests.Session(impersonate=impersonation, proxies=ATP_PROXIES)
+    return ATP_SESSIONS[impersonation]
+
+
 def fetch_atp_page(url, timeout=15, attempts=3):
-    """Fetch an ATP page with a few browser fingerprints and a scraper fallback."""
-    impersonations = ("chrome124",)
-    last_error = None
+    """Fetch an ATP page, rotating browser fingerprints with a cloudscraper fallback."""
+    errors = []
 
     for attempt in range(1, attempts + 1):
-        for impersonation in impersonations:
+        for impersonation in ATP_IMPERSONATIONS:
             try:
-                response = ATP_SESSION.get(url=url, timeout=timeout)
+                response = get_atp_session(impersonation).get(url=url, timeout=timeout)
                 if response.status_code == 200:
                     return response
-                last_error = RuntimeError(
-                    f"ATP returned {response.status_code} for {url} using {impersonation}"
-                )
+                errors.append(f"{impersonation}: HTTP {response.status_code}")
             except Exception as exc:
-                last_error = exc
+                errors.append(f"{impersonation}: {type(exc).__name__}: {exc}")
 
         try:
             response = ATP_SCRAPER.get(
                 url,
                 timeout=timeout,
+                proxies=ATP_PROXIES,
                 headers={
                     "User-Agent": (
                         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-                        "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+                        "(KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
                     ),
                     "Accept-Language": "en-US,en;q=0.9",
                     "Referer": "https://www.atptour.com/en/rankings/singles",
@@ -48,16 +57,16 @@ def fetch_atp_page(url, timeout=15, attempts=3):
             )
             if response.status_code == 200:
                 return response
-            last_error = RuntimeError(
-                f"ATP returned {response.status_code} for {url} using cloudscraper"
-            )
+            errors.append(f"cloudscraper: HTTP {response.status_code}")
         except Exception as exc:
-            last_error = exc
+            errors.append(f"cloudscraper: {type(exc).__name__}: {exc}")
 
         if attempt < attempts:
-            time.sleep(attempt)
+            time.sleep(5 * attempt)
 
-    raise RuntimeError(f"Failed to fetch {url} from ATP") from last_error
+    # Only report the last round so the log stays readable
+    summary = "; ".join(errors[-(len(ATP_IMPERSONATIONS) + 1):])
+    raise RuntimeError(f"Failed to fetch {url} from ATP ({summary})")
 
 def extract_text(soup, element_class):
     tags = soup.find_all(class_=element_class)
@@ -154,4 +163,4 @@ if __name__ == '__main__':
             time.sleep(1)
         else:
             print(f"Error: Failed to collect ATP rankings for {x}")
-            break
+            break
