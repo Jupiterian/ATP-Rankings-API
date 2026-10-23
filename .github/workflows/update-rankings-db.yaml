@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   update-db:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Check out repo
@@ -29,7 +29,16 @@ jobs:
       - name: Refresh rankings database
         env:
           ATP_PROXY: ${{ secrets.ATP_PROXY }}
-        run: python -u scripts/filler.py
+          ATP_SCREENSHOT_DIR: ${{ runner.temp }}/atp-screenshots
+        run: xvfb-run -a python -u scripts/filler.py
+
+      - name: Upload challenge screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: atp-challenge-screenshots
+          path: ${{ runner.temp }}/atp-screenshots
+          if-no-files-found: ignore
 
       - name: Commit updated database
         run: |
