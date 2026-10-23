@@ -26,13 +26,19 @@ jobs:
       - name: Install dependencies
         run: python -m pip install -r requirements.txt
 
-      - name: Install Chromium
-        run: python -m playwright install --with-deps chromium
-
       - name: Refresh rankings database
         env:
           ATP_PROXY: ${{ secrets.ATP_PROXY }}
+          ATP_SCREENSHOT_DIR: ${{ runner.temp }}/atp-screenshots
         run: xvfb-run -a python -u scripts/filler.py
+
+      - name: Upload challenge screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: atp-challenge-screenshots
+          path: ${{ runner.temp }}/atp-screenshots
+          if-no-files-found: ignore
 
       - name: Commit updated database
         run: |

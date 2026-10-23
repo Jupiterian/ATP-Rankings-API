@@ -36,17 +36,21 @@ class BrowserResponse:
 
 def get_browser_page():
     if "page" not in ATP_BROWSER:
-        from playwright.sync_api import sync_playwright
+        import tempfile
+        # patchright is a drop-in Playwright fork that hides the automation flags Cloudflare looks for
+        from patchright.sync_api import sync_playwright
 
         playwright = sync_playwright().start()
-        # Headed Chromium (under xvfb on CI) gets through Cloudflare's challenge more often than headless
-        browser = playwright.chromium.launch(
+        # Real Chrome, headed (under xvfb on CI), with no viewport override looks most like a person
+        browser = playwright.chromium.launch_persistent_context(
+            user_data_dir=tempfile.mkdtemp(prefix="atp-chrome-"),
+            channel=os.environ.get("ATP_BROWSER_CHANNEL", "chrome"),
             headless=not os.environ.get("DISPLAY"),
-            args=["--disable-blink-features=AutomationControlled"],
+            no_viewport=True,
             proxy={"server": ATP_PROXY} if ATP_PROXY else None,
         )
-        context = browser.new_context(locale="en-US", viewport={"width": 1366, "height": 900})
-        ATP_BROWSER.update(playwright=playwright, browser=browser, page=context.new_page())
+        page = browser.pages[0] if browser.pages else browser.new_page()
+        ATP_BROWSER.update(playwright=playwright, browser=browser, page=page)
         atexit.register(close_browser)
     return ATP_BROWSER["page"]
 
@@ -66,6 +70,10 @@ def fetch_with_browser(url, timeout=15, challenge_wait=45):
     while "just a moment" in page.title().lower():
         if time.time() > deadline:
             status = response.status if response else "no response"
+            screenshot_dir = os.environ.get("ATP_SCREENSHOT_DIR")
+            if screenshot_dir:
+                os.makedirs(screenshot_dir, exist_ok=True)
+                page.screenshot(path=os.path.join(screenshot_dir, f"challenge-{int(time.time())}.png"))
             raise RuntimeError(f"Cloudflare challenge did not clear (HTTP {status})")
         page.wait_for_timeout(1000)
     page.wait_for_load_state("domcontentloaded")
