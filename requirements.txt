@@ -33,6 +33,7 @@ mdurl==0.1.2
 numpy==2.3.5
 packaging==25.0
 pillow==12.0.0
+playwright==1.55.0
 pluggy==1.6.0
 pycparser==3.0
 pydantic==2.12.4
