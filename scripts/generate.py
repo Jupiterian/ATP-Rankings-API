@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup as bs
 import sqlite3
 import time
 import os
+import atexit
 import cloudscraper
 
 # Get the project root directory (parent of scripts/)
@@ -19,6 +20,64 @@ ATP_SESSIONS = {}
 ATP_SCRAPER = cloudscraper.create_scraper(
     browser={"browser": "chrome", "platform": "windows", "mobile": False}
 )
+# Set once plain HTTP gets blocked, so later pages go straight to the real browser
+ATP_BROWSER_ONLY = False
+ATP_BROWSER = {}
+
+
+class BrowserResponse:
+    """Minimal stand-in for an HTTP response, built from a rendered browser page."""
+
+    def __init__(self, status_code, html):
+        self.status_code = status_code
+        self.text = html
+        self.content = html.encode("utf-8")
+
+
+def get_browser_page():
+    if "page" not in ATP_BROWSER:
+        import tempfile
+        # patchright is a drop-in Playwright fork that hides the automation flags Cloudflare looks for
+        from patchright.sync_api import sync_playwright
+
+        playwright = sync_playwright().start()
+        # Real Chrome, headed (under xvfb on CI), with no viewport override looks most like a person
+        browser = playwright.chromium.launch_persistent_context(
+            user_data_dir=tempfile.mkdtemp(prefix="atp-chrome-"),
+            channel=os.environ.get("ATP_BROWSER_CHANNEL", "chrome"),
+            headless=not os.environ.get("DISPLAY"),
+            no_viewport=True,
+            proxy={"server": ATP_PROXY} if ATP_PROXY else None,
+        )
+        page = browser.pages[0] if browser.pages else browser.new_page()
+        ATP_BROWSER.update(playwright=playwright, browser=browser, page=page)
+        atexit.register(close_browser)
+    return ATP_BROWSER["page"]
+
+
+def close_browser():
+    if "browser" in ATP_BROWSER:
+        ATP_BROWSER["browser"].close()
+        ATP_BROWSER["playwright"].stop()
+        ATP_BROWSER.clear()
+
+
+def fetch_with_browser(url, timeout=15, challenge_wait=45):
+    """Load a page in real Chromium and wait for Cloudflare's JS challenge to clear."""
+    page = get_browser_page()
+    response = page.goto(url, wait_until="domcontentloaded", timeout=timeout * 1000)
+    deadline = time.time() + challenge_wait
+    while "just a moment" in page.title().lower():
+        if time.time() > deadline:
+            status = response.status if response else "no response"
+            screenshot_dir = os.environ.get("ATP_SCREENSHOT_DIR")
+            if screenshot_dir:
+                os.makedirs(screenshot_dir, exist_ok=True)
+                page.screenshot(path=os.path.join(screenshot_dir, f"challenge-{int(time.time())}.png"))
+            raise RuntimeError(f"Cloudflare challenge did not clear (HTTP {status})")
+        page.wait_for_timeout(1000)
+    page.wait_for_load_state("domcontentloaded")
+    return BrowserResponse(200, page.content())
 
 
 def get_atp_session(impersonation):
@@ -28,10 +87,11 @@ def get_atp_session(impersonation):
 
 
 def fetch_atp_page(url, timeout=15, attempts=3):
-    """Fetch an ATP page, rotating browser fingerprints with a cloudscraper fallback."""
+    """Fetch an ATP page, rotating browser fingerprints, then cloudscraper, then real Chromium."""
+    global ATP_BROWSER_ONLY
     errors = []
 
-    for attempt in range(1, attempts + 1):
+    for attempt in range(1, 0 if ATP_BROWSER_ONLY else attempts + 1):
         for impersonation in ATP_IMPERSONATIONS:
             try:
                 response = get_atp_session(impersonation).get(url=url, timeout=timeout)
@@ -64,8 +124,17 @@ def fetch_atp_page(url, timeout=15, attempts=3):
         if attempt < attempts:
             time.sleep(5 * attempt)
 
+    try:
+        response = fetch_with_browser(url, timeout=max(timeout, 30))
+        if not ATP_BROWSER_ONLY:
+            print("Plain HTTP requests are blocked; using Chromium for the remaining ATP pages")
+        ATP_BROWSER_ONLY = True
+        return response
+    except Exception as exc:
+        errors.append(f"chromium: {type(exc).__name__}: {exc}")
+
     # Only report the last round so the log stays readable
-    summary = "; ".join(errors[-(len(ATP_IMPERSONATIONS) + 1):])
+    summary = "; ".join(errors[-(len(ATP_IMPERSONATIONS) + 2):])
     raise RuntimeError(f"Failed to fetch {url} from ATP ({summary})")
 
 def extract_text(soup, element_class):
