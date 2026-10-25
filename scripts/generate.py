@@ -155,7 +155,7 @@ if __name__ == '__main__':
 
     #Extract Rankings for dates
     dates = extract_weeks(soup)
-    start_date = "1996-03-11" #Adjust in case collect.py stops due to some error midway through (expect this to happen after 10 years of data)
+    start_date = "2026-10-19" #Adjust in case collect.py stops due to some error midway through (expect this to happen after 10 years of data)
     start_index = dates.index(start_date) if start_date in dates else 0 # Start from this date
     for x in dates[start_index:]:
         if collectData(x, conn):
@@ -163,4 +163,4 @@ if __name__ == '__main__':
             time.sleep(1)
         else:
             print(f"Error: Failed to collect ATP rankings for {x}")
-            break
+            break
