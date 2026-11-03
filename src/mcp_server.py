@@ -9,6 +9,7 @@ as a custom connector in Claude.ai.
 from typing import Optional, Any, Dict, List
 
 from mcp.server.fastmcp import FastMCP
+from mcp.server.transport_security import TransportSecuritySettings
 
 from .services import (
     search_players as service_search_players,
@@ -28,6 +29,11 @@ mcp = FastMCP(
         "any given week."
     ),
     stateless_http=True,
+    # FastMCP's default host (127.0.0.1) turns on DNS-rebinding protection that
+    # only accepts localhost Host headers, so requests to the public domain get
+    # a 421. That check guards local servers; this one is public, read-only and
+    # unauthenticated, so there is nothing for it to protect.
+    transport_security=TransportSecuritySettings(enable_dns_rebinding_protection=False),
 )
 
 
